@@ -20,7 +20,6 @@ public class RegisterHandler {
      * @param newChannel Currently watched channel.
      * @param television Television sending the registration message.
      * @param channelMap Mapping of channels to listening clients.
-     * @return New register handler instance.
      **/
     public RegisterHandler(Channel previousChannel, Channel newChannel, Television television, ChannelMap channelMap) {
         this.previousChannel = previousChannel;

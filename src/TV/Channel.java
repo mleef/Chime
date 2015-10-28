@@ -10,7 +10,6 @@ public class Channel {
     /**
      * Constructor for Channel class.
      * @param id Unique channel identifier (could just be the channel number).
-     * @return New channel object.
      **/
     public Channel(String id) {
         this.id = id;

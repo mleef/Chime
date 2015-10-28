@@ -14,7 +14,6 @@ public class ChimeManager {
 
     /**
      * Constructor for the ChimeManager class.
-     * @returns new Chime Manager instance.
      **/
     public ChimeManager() {
         try {

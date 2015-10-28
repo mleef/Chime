@@ -4,6 +4,7 @@ import java.net.Socket;
 
 /**
  * Created by marcleef on 10/28/15.
+ * Organizes television metadata and associated socket.
  */
 public class Television {
     private String id;
@@ -13,7 +14,6 @@ public class Television {
      * Constructor for Television class.
      * @param id Unique television identifier.
      * @param socket Socket to broadcast messages to.
-     * @return New channel object.
      **/
     public Television(String id, Socket socket) {
         this.id = id;

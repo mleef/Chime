@@ -15,7 +15,6 @@ public class MessageHandler implements Runnable {
      * Constructor for MessageHandler class.
      * @param message Message being sent.
      * @param channelMap Mapping of channels to listening clients.
-     * @return New message handler instance.
      **/
     public MessageHandler(Chime message, ChannelMap channelMap) {
         this.chime = message;
