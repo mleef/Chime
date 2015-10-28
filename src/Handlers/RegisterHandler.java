@@ -29,9 +29,15 @@ public class RegisterHandler {
     }
 
     /**
-     * TODO: Update mappings to reflect changes.
+     * Dispatch thread to adjust television mappings to reflect channel changes.
      **/
     public void run() {
+        // Remove tv from its previously associated channel list if it has one
+        if(previousChannel != null) {
+            channelMap.removeTV(previousChannel, television);
+        }
 
+        // Update mappings with new channel
+        channelMap.putTV(newChannel, television);
     }
 }

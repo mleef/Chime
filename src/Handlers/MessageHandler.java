@@ -1,7 +1,9 @@
 package Handlers;
 
+import java.util.Set;
 import DataStructures.ChannelMap;
 import Messaging.Chime;
+import TV.Television;
 
 /**
  * Created by marcleef on 10/28/15.
@@ -22,9 +24,17 @@ public class MessageHandler implements Runnable {
     }
 
     /**
-     * TODO: Broadcast message to all listening televisions.
+     * Relay new message to all listening clients.
      **/
     public void run() {
+        // Get all TVs currently watching given message source channel
+        Set<Television> tvList = channelMap.get(chime.getChannel());
 
+        // Get message to broadcast (should be JSONified)
+        String message = chime.getMessage();
+
+        for(Television recipient : tvList) {
+            // broadcast message
+        }
     }
 }
