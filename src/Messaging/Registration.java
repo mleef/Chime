@@ -10,12 +10,12 @@ import TV.Television;
 public class Registration {
     private Channel previousChannel;
     private Channel newChannel;
-    private String televisionId;
+    private Television television;
 
-    public Registration(Channel previousChannel, Channel newChannel, String televisionId) {
+    public Registration(Channel previousChannel, Channel newChannel, Television television) {
         this.previousChannel = previousChannel;
         this.newChannel = newChannel;
-        this.televisionId = televisionId;
+        this.television = television;
     }
 }
 

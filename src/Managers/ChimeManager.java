@@ -38,18 +38,17 @@ public class ChimeManager {
     }
 
     private void dispatchThread(Runnable task) {
-
+        new Thread(task).start();
     }
 
     /**
-     * TODO: Process message type and dispatch appropriate thread handler.
+     * Relay new socket connection to handler to be processed.
      **/
     public void run() {
         while(true) {
             try {
                 Socket newClient = server.accept();
-                ConnectionHandler handler = new ConnectionHandler(newClient);
-                new Thread(handler).start();
+                dispatchThread(new ConnectionHandler(newClient));
             } catch(Exception e) {
                 e.printStackTrace();
             }

@@ -14,18 +14,18 @@ public class Chime {
     private Channel channel;
     private String message;
     private Television sender;
-    private Timestamp timeReceived;
+    private String timeSent;
 
     /**
      * Constructor for Chime class.
      * @param channel Channel message was sent from.
      * @param sender Television that sent the message.
      **/
-    public Chime(Channel channel, Television sender, String message) {
+    public Chime(Channel channel, Television sender, String message, String timeSent) {
         this.channel = channel;
         this.sender = sender;
         this.message = message;
-        this.timeReceived = new Timestamp(new Date().getTime());
+        this.timeSent = timeSent;
     }
 
     /**
