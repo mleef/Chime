@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+import DataStructures.ChannelMap;
+import DataStructures.TelevisionMap;
 import Messaging.*;
 import TV.Channel;
 import com.google.gson.*;
@@ -15,9 +17,17 @@ import com.google.gson.*;
  */
 public class ConnectionHandler implements Runnable {
     private Socket client;
+    private ChannelMap channelMap;
+    private TelevisionMap televisionMap;
 
-    public ConnectionHandler(Socket client) {
+    public ConnectionHandler(Socket client, ChannelMap channelMap, TelevisionMap televisionMap) {
+        this.channelMap = channelMap;
+        this.televisionMap = televisionMap;
         this.client = client;
+    }
+
+    private void dispatchThread(Runnable task) {
+        new Thread(task).start();
     }
 
     public void run() {
@@ -31,6 +41,14 @@ public class ConnectionHandler implements Runnable {
             // Get values contained in messages to dispatch thread
             Chime chime = message.getChime();
             Registration registration = message.getRegistration();
+
+            // Dispatch appropriate worker thread based on message type
+            if(chime == null && registration != null) {
+                dispatchThread(new RegisterHandler(client, registration, channelMap, televisionMap));
+            } else if(registration == null && chime != null) {
+                dispatchThread(new ChimeHandler(client, chime, channelMap, televisionMap));
+            }
+
 
         } catch(Exception e) {
             e.printStackTrace();

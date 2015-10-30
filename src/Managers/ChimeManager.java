@@ -27,9 +27,9 @@ public class ChimeManager {
      **/
     public ChimeManager() {
         try {
-            server = new ServerSocket(4444);
-            channelMap = new ChannelMap();
-            televisionMap = new TelevisionMap();
+            this.server = new ServerSocket(4444);
+            this.channelMap = new ChannelMap();
+            this.televisionMap = new TelevisionMap();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -48,7 +48,7 @@ public class ChimeManager {
         while(true) {
             try {
                 Socket newClient = server.accept();
-                dispatchThread(new ConnectionHandler(newClient));
+                dispatchThread(new ConnectionHandler(newClient, channelMap, televisionMap));
             } catch(Exception e) {
                 e.printStackTrace();
             }
