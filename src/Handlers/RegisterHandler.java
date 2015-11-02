@@ -12,7 +12,7 @@ import java.net.Socket;
  * Created by marcleef on 10/28/15.
  * Handles the switching of channels and updates map accordingly.
  */
-public class RegisterHandler implements Runnable {
+public class RegisterHandler extends Handler {
     private Socket televisionSocket;
     private Registration registration;
     private ChannelMap channelMap;
@@ -23,6 +23,7 @@ public class RegisterHandler implements Runnable {
      * @param televisionSocket Socket of tv making connection
      * @param registration Registration object that stores channel switch info.
      * @param channelMap Mapping of channels to listening clients.
+     * @param televisionMap Mapping of televisions to associated open sockets.
      **/
     public RegisterHandler(Socket televisionSocket, Registration registration, ChannelMap channelMap, TelevisionMap televisionMap) {
         this.televisionSocket = televisionSocket;

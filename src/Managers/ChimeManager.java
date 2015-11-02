@@ -13,10 +13,11 @@ import Handlers.ConnectionHandler;
  * Created by marcleef on 10/28/15.
  * Logic to manage client requests and dispatch appropriate handlers.
  */
-public class ChimeManager {
+public final class ChimeManager {
     private ServerSocket server;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
+    private final int PORT_NUM = 4444;
 
     public static void main(String[] args) {
         ChimeManager manager = new ChimeManager();
@@ -27,7 +28,7 @@ public class ChimeManager {
      **/
     public ChimeManager() {
         try {
-            this.server = new ServerSocket(4444);
+            this.server = new ServerSocket(PORT_NUM);
             this.channelMap = new ChannelMap();
             this.televisionMap = new TelevisionMap();
 

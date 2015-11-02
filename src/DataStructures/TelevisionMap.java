@@ -11,6 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by marcleef on 10/28/15.
  * Mapping of televisions to their open sockets.
  */
-public class TelevisionMap extends ConcurrentHashMap<Television, Socket> {
+public final class TelevisionMap extends ConcurrentHashMap<Television, Socket> {
 
 }

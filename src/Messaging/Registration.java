@@ -18,9 +18,7 @@ public class Registration {
         this.television = television;
     }
 
-    public Channel getPreviousChannel() {
-        return previousChannel;
-    }
+    public Channel getPreviousChannel() { return previousChannel; }
 
     public Channel getNewChannel() {
         return newChannel;

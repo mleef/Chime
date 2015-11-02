@@ -15,30 +15,41 @@ import com.google.gson.*;
  * Created by marcleef on 10/28/15.
  * To handle connection and dispatch appropriate helper threads.
  */
-public class ConnectionHandler implements Runnable {
+public class ConnectionHandler extends Handler {
     private Socket client;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
+    private Gson gson;
 
+    /**
+     * Constructor for ChimeHandler class.
+     * @param client Socket of television that sent message.
+     * @param channelMap Mapping of channels to listening clients.
+     * @param televisionMap Mapping of televisions to associated open sockets.
+     **/
     public ConnectionHandler(Socket client, ChannelMap channelMap, TelevisionMap televisionMap) {
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;
         this.client = client;
+        this.gson = new Gson();
     }
 
     private void dispatchThread(Runnable task) {
         new Thread(task).start();
     }
 
+    /**
+     * Determine content of client message and dispatch appropriate handler type.
+     **/
     public void run() {
         try {
+            // Get socket's input stream
             BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-            Gson gson = new Gson();
 
-            // Normalize message
+            // Deserialize message into Message object instance
             Message message = gson.fromJson(in, Message.class);
 
-            // Get values contained in messages to dispatch thread
+            // Get values contained in message to dispatch appropriate thread
             Chime chime = message.getChime();
             Registration registration = message.getRegistration();
 

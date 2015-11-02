@@ -14,7 +14,7 @@ import com.google.gson.*;
  * Created by marcleef on 10/28/15.
  * Handles sent messages by broadcasting them to listening clients.
  */
-public class ChimeHandler implements Runnable {
+public class ChimeHandler extends Handler {
     private Socket televisionSocket;
     private Chime chime;
     private ChannelMap channelMap;
@@ -23,8 +23,10 @@ public class ChimeHandler implements Runnable {
 
     /**
      * Constructor for ChimeHandler class.
+     * @param televisionSocket Socket of television that sent chime.
      * @param chime Message being sent.
      * @param channelMap Mapping of channels to listening clients.
+     * @param televisionMap Mapping of televisions to associated open sockets.
      **/
     public ChimeHandler(Socket televisionSocket, Chime chime, ChannelMap channelMap, TelevisionMap televisionMap) {
         this.televisionSocket = televisionSocket;
@@ -47,15 +49,17 @@ public class ChimeHandler implements Runnable {
 
         // Broadcast message to each watching television
         for(Television television : watchingTelevisions) {
-            // Get television associated socket
+            // Get socket associated with given television
             currentSocket = televisionMap.get(television);
             try {
                 // Write json output to socket stream
                 out = new OutputStreamWriter(currentSocket.getOutputStream(), StandardCharsets.UTF_8);
                 out.write(gson.toJson(chime));
+
             } catch(Exception e) {
                 e.printStackTrace();
             }
         }
     }
+
 }
