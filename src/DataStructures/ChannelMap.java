@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * Created by marcleef on 10/28/15.
  * Modified thread-safe hash map that maps channels to currently listening televisions.
@@ -15,12 +18,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
     private int NUM_VIEWERS = 0;
     private int NUM_CHANNELS = 0;
+    private Logger logger;
 
     /**
      * Constructor for ChannelMap class.
      **/
     public ChannelMap() {
         super();
+        this.logger = LoggerFactory.getLogger(ChannelMap.class);
     }
 
     /**
@@ -29,6 +34,7 @@ public class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
      * @return Updated set of television objects.
      **/
     public Set<Television> addChannel(Channel channel) {
+        logger.info("Adding new channel to map.", channel);
         this.put(channel, new HashSet<Television>());
         return this.get(channel);
     }
@@ -48,9 +54,11 @@ public class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
 
         // Overwrite existing version if it exists
         if(this.get(channel).contains(television)) {
+            logger.info("Overwriting existing television.",channel, television);
             this.get(channel).remove(television);
             this.get(channel).add(television);
         } else {
+            logger.info("Adding new television.",channel, television);
             this.get(channel).add(television);
             NUM_VIEWERS++;
         }
@@ -68,10 +76,12 @@ public class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
     public Set<Television> removeTV(Channel channel, Television television) {
         // Check for channel existence
         if(!this.containsKey(channel)) {
+            logger.error("Tried to remove television from nonexistent channel.",channel, television);
             return null;
         } else {
             // Remove television if it exists in the given channel
             if(this.get(channel).contains(television)) {
+                logger.info("Removing television.",channel, television);
                 this.get(channel).remove(television);
                 NUM_VIEWERS--;
             }
@@ -85,6 +95,7 @@ public class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
      **/
     public int getChannelViewers(Channel channel) {
         if(!this.containsKey(channel)) {
+            logger.error("Cannot get viewers of nonexistent channel.",channel);
             return -1;
         }
         // Return number of watching televisions for channel

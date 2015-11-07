@@ -9,7 +9,8 @@ import DataStructures.TelevisionMap;
 import Messaging.*;
 import TV.Channel;
 import com.google.gson.*;
-
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Created by marcleef on 10/28/15.
@@ -20,6 +21,8 @@ public class ConnectionHandler extends Handler {
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
     private Gson gson;
+    private Logger logger;
+
 
     /**
      * Constructor for ChimeHandler class.
@@ -32,10 +35,7 @@ public class ConnectionHandler extends Handler {
         this.televisionMap = televisionMap;
         this.client = client;
         this.gson = new Gson();
-    }
-
-    private void dispatchThread(Runnable task) {
-        new Thread(task).start();
+        this.logger = LoggerFactory.getLogger(ConnectionHandler.class);
     }
 
     /**
@@ -55,13 +55,16 @@ public class ConnectionHandler extends Handler {
 
             // Dispatch appropriate worker thread based on message type
             if(chime == null && registration != null) {
-                dispatchThread(new RegisterHandler(client, registration, channelMap, televisionMap));
+                logger.info("Dispatching new register handler");
+                new Thread(new RegisterHandler(client, registration, channelMap, televisionMap)).start();
             } else if(registration == null && chime != null) {
-                dispatchThread(new ChimeHandler(client, chime, channelMap, televisionMap));
+                logger.info("Dispatching new chime handler");
+                new Thread(new ChimeHandler(client, chime, channelMap, televisionMap)).start();
             }
 
 
         } catch(Exception e) {
+            logger.error("Error", e);
             e.printStackTrace();
         }
     }

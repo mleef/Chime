@@ -9,6 +9,8 @@ import DataStructures.TelevisionMap;
 import Messaging.Chime;
 import TV.Television;
 import com.google.gson.*;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  * Created by marcleef on 10/28/15.
@@ -20,6 +22,8 @@ public class ChimeHandler extends Handler {
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
     private Gson gson;
+    private Logger logger;
+
 
     /**
      * Constructor for ChimeHandler class.
@@ -34,6 +38,7 @@ public class ChimeHandler extends Handler {
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;
         this.gson = new Gson();
+        this.logger = LoggerFactory.getLogger(ChimeHandler.class);
     }
 
     /**
@@ -42,6 +47,8 @@ public class ChimeHandler extends Handler {
     public void run() {
         // Get all TVs currently watching given message source channel
         Set<Television> watchingTelevisions = channelMap.get(chime.getChannel());
+
+        logger.info("Preparing to broadcast messages", watchingTelevisions);
 
         // To write chimes to
         Socket currentSocket;
@@ -54,15 +61,18 @@ public class ChimeHandler extends Handler {
             try {
                 // Check if connection is still alive
                 if(currentSocket.isClosed()) {
+                    logger.error("Tried to broadcast to closed socket, removing from map");
                     televisionMap.remove(television);
                 } else {
                     // Write json output to socket stream
                     out = new OutputStreamWriter(currentSocket.getOutputStream(), StandardCharsets.UTF_8);
                     out.write(gson.toJson(chime));
                     out.flush();
+                    logger.info("Succesfully sent chime", currentSocket);
                 }
 
             } catch(Exception e) {
+                logger.error("Error", e);
                 e.printStackTrace();
             }
         }

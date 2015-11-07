@@ -4,6 +4,9 @@ import DataStructures.ChannelMap;
 import DataStructures.TelevisionMap;
 
 import java.util.Timer;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 
 /**
  * Created by marcleef on 11/6/15.
@@ -14,14 +17,17 @@ public class ServerManager {
         ChannelMap channelMap = new ChannelMap();
         TelevisionMap televisionMap = new TelevisionMap();
         int portNumber = 4444;
+        Logger logger = LoggerFactory.getLogger(ServerManager.class);
 
         // Initialize chime manager and begin execution
         ChimeManager chimeManager = new ChimeManager(portNumber,channelMap, televisionMap);
+        logger.info("Starting Chime Manager...", chimeManager);
         new Thread(chimeManager).start();
 
-        // Start intermittent logger
-        Timer timer = new Timer("MyTimer");
-        timer.scheduleAtFixedRate(new LoggerManager(channelMap, televisionMap), 100, 1000);
+        // Start intermittent cleanup
+        Timer timer = new Timer("Cleaner");
+        logger.info("Starting Cleanup Manager...", timer);
+        timer.scheduleAtFixedRate(new CleanupManager(channelMap, televisionMap), 100, 1000);
     }
 
 }

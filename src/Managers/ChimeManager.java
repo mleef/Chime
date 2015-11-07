@@ -9,6 +9,9 @@ import DataStructures.ChannelMap;
 import DataStructures.TelevisionMap;
 import Handlers.ConnectionHandler;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 /**
  * Created by marcleef on 10/28/15.
  * Logic to manage client requests and dispatch appropriate handlers.
@@ -17,6 +20,7 @@ public class ChimeManager implements Runnable {
     private ServerSocket server;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
+    private Logger logger;
 
     /**
      * Constructor for the ChimeManager class.
@@ -26,6 +30,7 @@ public class ChimeManager implements Runnable {
             this.server = new ServerSocket(portNumber);
             this.channelMap = channelMap;
             this.televisionMap = televisionMap;
+            this.logger = LoggerFactory.getLogger(ChimeManager.class);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -40,8 +45,10 @@ public class ChimeManager implements Runnable {
         while(true) {
             try {
                 Socket newClient = server.accept();
+                logger.info("New connection", newClient);
                 new Thread(new ConnectionHandler(newClient, channelMap, televisionMap)).start();
             } catch(Exception e) {
+                logger.error("Error", e);
                 e.printStackTrace();
             }
         }
