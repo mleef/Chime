@@ -5,7 +5,6 @@ import DataStructures.TelevisionMap;
 import Messaging.Registration;
 import TV.Channel;
 import TV.Television;
-import com.google.gson.Gson;
 
 import java.io.OutputStreamWriter;
 import java.net.Socket;
@@ -25,7 +24,6 @@ public class RegisterHandler extends Handler {
     private Registration registration;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
-    private Gson gson;
     private Logger logger;
 
     /**
@@ -40,7 +38,6 @@ public class RegisterHandler extends Handler {
         this.registration = registration;
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;
-        this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(RegisterHandler.class);
     }
 
@@ -50,35 +47,19 @@ public class RegisterHandler extends Handler {
     public void run() {
         // Add/update TV's socket
         televisionMap.put(registration.getTelevision(), televisionSocket);
-        logger.info("Updating television socket in map: ", registration.getTelevision(), televisionSocket);
+
+        logger.info(String.format("Updating television (%s) socket (%s) in map.", registration.getTelevision().getId(), televisionSocket.toString()));
 
         // Remove tv from its previously associated channel list if it has one
         if(registration.getPreviousChannel() != null) {
-            logger.info("Removing television from previous channel set", registration.getPreviousChannel(), registration.getTelevision());
+            logger.info(String.format("Removing television (%s) from previous channel (%s).", registration.getPreviousChannel().getId(), registration.getTelevision().getId()));
             channelMap.removeTV(registration.getPreviousChannel(), registration.getTelevision());
         }
 
-        logger.info("Adding television to new channel set", registration.getNewChannel(), registration.getTelevision());
+        logger.info(String.format("Adding television (%s) to new channel (%s).", registration.getTelevision().getId(), registration.getNewChannel().getId()));
+
         // Update mappings with new channel
         channelMap.putTV(registration.getNewChannel(), registration.getTelevision());
-
-        /*
-        // To write back to client
-        Socket currentSocket;
-        OutputStreamWriter out;
-
-        try {
-            // Check if connection is still alive
-            if(!televisionSocket.isClosed()) {
-                // Write json output to socket stream
-                out = new OutputStreamWriter(televisionSocket.getOutputStream(), StandardCharsets.UTF_8);
-                out.write("Received.\n");
-                out.flush();
-            }
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        */
 
 
     }

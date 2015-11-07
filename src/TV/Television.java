@@ -16,6 +16,14 @@ public class Television {
     }
 
     /**
+     * Getter for television id.
+     * @return ID of television.
+     **/
+    public String getId() {
+        return id;
+    }
+
+    /**
      * Override equals so equality is just based on id.
      **/
     @Override

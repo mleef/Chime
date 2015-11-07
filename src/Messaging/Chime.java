@@ -29,6 +29,22 @@ public class Chime {
     }
 
     /**
+     * Sender getter.
+     * @return Sender of Chime.
+     **/
+    public Television getSender() {
+        return sender;
+    }
+
+    /**
+     * Time sent getter.
+     * @return Time Chime was sent.
+     **/
+    public String getTimeSent() {
+        return timeSent;
+    }
+
+    /**
      * Channel getter.
      * @return Current channel.
      **/

@@ -55,16 +55,18 @@ public class ConnectionHandler extends Handler {
 
             // Dispatch appropriate worker thread based on message type
             if(chime == null && registration != null) {
-                logger.info("Dispatching new register handler");
+                logger.info(String.format("REGISTRATION - FROM: %s, NEW CHANNEL: %s", registration.getTelevision().getId(), registration.getNewChannel().getId()));
+                logger.info("Dispatching new Register handler.");
                 new Thread(new RegisterHandler(client, registration, channelMap, televisionMap)).start();
             } else if(registration == null && chime != null) {
-                logger.info("Dispatching new chime handler");
+                logger.info(String.format("CHIME - CHANNEL: %s, FROM: %s, TIME SENT: %s MESSAGE: %s", chime.getChannel().getId(), chime.getSender().getId(), chime.getTimeSent(), chime.getMessage()));
+                logger.info("Dispatching new Chime handler.");
                 new Thread(new ChimeHandler(client, chime, channelMap, televisionMap)).start();
             }
 
 
         } catch(Exception e) {
-            logger.error("Error", e);
+            logger.error(e.toString());
             e.printStackTrace();
         }
     }

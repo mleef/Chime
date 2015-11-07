@@ -15,6 +15,13 @@ public class Channel {
         this.id = id;
     }
 
+    /**
+     * Getter for channel id.
+     * @return ID of channel.
+     **/
+    public String getId() {
+        return id;
+    }
 
     /**
      * Override equals so equality is just based on id.

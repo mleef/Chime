@@ -21,13 +21,13 @@ public class ServerManager {
 
         // Initialize chime manager and begin execution
         ChimeManager chimeManager = new ChimeManager(portNumber,channelMap, televisionMap);
-        logger.info("Starting Chime Manager...", chimeManager);
+        logger.info("Starting Chime Manager...");
         new Thread(chimeManager).start();
 
         // Start intermittent cleanup
         Timer timer = new Timer("Cleaner");
-        logger.info("Starting Cleanup Manager...", timer);
-        timer.scheduleAtFixedRate(new CleanupManager(channelMap, televisionMap), 100, 1000);
+        logger.info("Starting Cleanup Manager...");
+        timer.scheduleAtFixedRate(new CleanupManager(channelMap, televisionMap), 1000, 10000);
     }
 
 }

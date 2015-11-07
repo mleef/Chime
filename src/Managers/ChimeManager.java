@@ -45,10 +45,10 @@ public class ChimeManager implements Runnable {
         while(true) {
             try {
                 Socket newClient = server.accept();
-                logger.info("New connection", newClient);
+                logger.info(String.format("New connection: %s", newClient.toString()));
                 new Thread(new ConnectionHandler(newClient, channelMap, televisionMap)).start();
             } catch(Exception e) {
-                logger.error("Error", e);
+                logger.error(e.toString());
                 e.printStackTrace();
             }
         }

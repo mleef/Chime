@@ -48,7 +48,7 @@ public class ChimeHandler extends Handler {
         // Get all TVs currently watching given message source channel
         Set<Television> watchingTelevisions = channelMap.get(chime.getChannel());
 
-        logger.info("Preparing to broadcast messages", watchingTelevisions);
+        logger.info(String.format("Preparing to broadcast message to %d viewers.", watchingTelevisions.size()));
 
         // To write chimes to
         Socket currentSocket;
@@ -61,18 +61,18 @@ public class ChimeHandler extends Handler {
             try {
                 // Check if connection is still alive
                 if(currentSocket.isClosed()) {
-                    logger.error("Tried to broadcast to closed socket, removing from map");
+                    logger.error(String.format("Tried to broadcast to closed socket, removing %s from map.", television.getId()));
                     televisionMap.remove(television);
                 } else {
                     // Write json output to socket stream
                     out = new OutputStreamWriter(currentSocket.getOutputStream(), StandardCharsets.UTF_8);
                     out.write(gson.toJson(chime));
                     out.flush();
-                    logger.info("Succesfully sent chime", currentSocket);
+                    logger.info(String.format("Successfully sent Chime to %s.", television.getId()));
                 }
 
             } catch(Exception e) {
-                logger.error("Error", e);
+                logger.error(e.toString());
                 e.printStackTrace();
             }
         }
