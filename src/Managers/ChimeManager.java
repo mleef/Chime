@@ -13,33 +13,24 @@ import Handlers.ConnectionHandler;
  * Created by marcleef on 10/28/15.
  * Logic to manage client requests and dispatch appropriate handlers.
  */
-public final class ChimeManager {
+public class ChimeManager implements Runnable {
     private ServerSocket server;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
-    private final int PORT_NUM = 4444;
 
-    public static void main(String[] args) {
-        ChimeManager manager = new ChimeManager();
-        manager.run();
-    }
     /**
      * Constructor for the ChimeManager class.
      **/
-    public ChimeManager() {
+    public ChimeManager(int portNumber, ChannelMap channelMap, TelevisionMap televisionMap) {
         try {
-            this.server = new ServerSocket(PORT_NUM);
-            this.channelMap = new ChannelMap();
-            this.televisionMap = new TelevisionMap();
+            this.server = new ServerSocket(portNumber);
+            this.channelMap = channelMap;
+            this.televisionMap = televisionMap;
 
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);
         }
-    }
-
-    private void dispatchThread(Runnable task) {
-        new Thread(task).start();
     }
 
     /**
@@ -49,7 +40,7 @@ public final class ChimeManager {
         while(true) {
             try {
                 Socket newClient = server.accept();
-                dispatchThread(new ConnectionHandler(newClient, channelMap, televisionMap));
+                new Thread(new ConnectionHandler(newClient, channelMap, televisionMap)).start();
             } catch(Exception e) {
                 e.printStackTrace();
             }

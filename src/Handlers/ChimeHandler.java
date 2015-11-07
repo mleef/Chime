@@ -52,9 +52,15 @@ public class ChimeHandler extends Handler {
             // Get socket associated with given television
             currentSocket = televisionMap.get(television);
             try {
-                // Write json output to socket stream
-                out = new OutputStreamWriter(currentSocket.getOutputStream(), StandardCharsets.UTF_8);
-                out.write(gson.toJson(chime));
+                // Check if connection is still alive
+                if(currentSocket.isClosed()) {
+                    televisionMap.remove(television);
+                } else {
+                    // Write json output to socket stream
+                    out = new OutputStreamWriter(currentSocket.getOutputStream(), StandardCharsets.UTF_8);
+                    out.write(gson.toJson(chime));
+                    out.flush();
+                }
 
             } catch(Exception e) {
                 e.printStackTrace();

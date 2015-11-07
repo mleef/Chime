@@ -12,7 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by marcleef on 10/28/15.
  * Modified thread-safe hash map that maps channels to currently listening televisions.
  */
-public final class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
+public class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
+    private int NUM_VIEWERS = 0;
+    private int NUM_CHANNELS = 0;
 
     /**
      * Constructor for ChannelMap class.
@@ -39,17 +41,22 @@ public final class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>
      * @return Updated set of television objects.
      **/
     public Set<Television> putTV(Channel channel, Television television) {
-        // Check for channel existence
+        // Check for channel existence and create if it doesn't exist
         if(!this.containsKey(channel)) {
-            return null;
-        } else {
-            // Overwrite existing version if it exists
-            if(this.get(channel).contains(television)) {
-                this.get(channel).remove(television);
-            }
-            this.get(channel).add(television);
-            return this.get(channel);
+            this.addChannel(channel);
         }
+
+        // Overwrite existing version if it exists
+        if(this.get(channel).contains(television)) {
+            this.get(channel).remove(television);
+            this.get(channel).add(television);
+        } else {
+            this.get(channel).add(television);
+            NUM_VIEWERS++;
+        }
+
+        return this.get(channel);
+
     }
 
     /**
@@ -63,28 +70,33 @@ public final class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>
         if(!this.containsKey(channel)) {
             return null;
         } else {
-            // Remove television if it exists in teh given channel
+            // Remove television if it exists in the given channel
             if(this.get(channel).contains(television)) {
                 this.get(channel).remove(television);
+                NUM_VIEWERS--;
             }
             return this.get(channel);
         }
     }
 
     /**
-     * Sums all current users.
+     * Returns number of active users for given channel.
+     * @return Number of users viewing input channel.
+     **/
+    public int getChannelViewers(Channel channel) {
+        if(!this.containsKey(channel)) {
+            return -1;
+        }
+        // Return number of watching televisions for channel
+        return this.get(channel).size();
+    }
+
+    /**
+     * Returns total number of active users.
      * @return Total number of current users.
      **/
     public int getTotalViewers() {
-        int totalViewers = 0;
-
-        // Sum length all viewer sets
-        for(Channel channel : this.keySet()) {
-            totalViewers += this.get(channel).size();
-        }
-
-        return totalViewers;
-
+        return NUM_VIEWERS;
     }
 
 
