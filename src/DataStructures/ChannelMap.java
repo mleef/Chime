@@ -34,7 +34,7 @@ public class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
      **/
     public Set<Television> addChannel(Channel channel) {
         logger.info(String.format("Adding new channel (%s) to map.", channel.getId()));
-        this.put(channel, new HashSet<Television>());
+        this.put(channel, new HashSet<>());
         return this.get(channel);
     }
 
@@ -53,9 +53,7 @@ public class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
 
         // Overwrite existing version if it exists
         if(this.get(channel).contains(television)) {
-            logger.info(String.format("Overwriting existing television (%s) in channel (%s).", television.getId(), channel.getId()));
-            this.get(channel).remove(television);
-            this.get(channel).add(television);
+            logger.info(String.format("Television (%s) already exists in channel (%s).", television.getId(), channel.getId()));
         } else {
             logger.info(String.format("Adding new television (%s) to channel (%s).", television.getId(), channel.getId()));
             this.get(channel).add(television);
@@ -90,6 +88,7 @@ public class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
 
     /**
      * Returns number of active users for given channel.
+     * @param channel Given input channel.
      * @return Number of users viewing input channel.
      **/
     public int getChannelViewers(Channel channel) {

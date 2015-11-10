@@ -66,7 +66,6 @@ public class ConnectionHandler extends Handler {
             // Dispatch appropriate worker thread based on message type
             dispatchThread(chimeMessage, registrationMessage);
 
-
         } catch(Exception e) {
             logger.error(e.toString());
             e.printStackTrace();

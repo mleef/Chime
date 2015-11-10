@@ -17,6 +17,11 @@ public class CleanupManager extends TimerTask {
     private TelevisionMap televisionMap;
     private Logger logger;
 
+    /**
+     * Constructor for the CleanupManager class.
+     * @param channelMap Mapping of channels to watching televisions.
+     * @param televisionMap Mapping of televisions to respective sockets.
+     **/
     public CleanupManager(ChannelMap channelMap, TelevisionMap televisionMap) {
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;

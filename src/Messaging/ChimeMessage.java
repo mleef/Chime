@@ -20,6 +20,8 @@ public class ChimeMessage extends Message {
      * Constructor for Chime class.
      * @param channel Channel message was sent from.
      * @param sender Television that sent the message.
+     * @param message String content of Chime message.
+     * @param timeSent Timestamp from originating client send.
      **/
     public ChimeMessage(Channel channel, Television sender, String message, String timeSent) {
         this.channel = channel;

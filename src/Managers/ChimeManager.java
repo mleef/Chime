@@ -24,6 +24,9 @@ public class ChimeManager implements Runnable {
 
     /**
      * Constructor for the ChimeManager class.
+     * @param portNumber Port to listen on.
+     * @param channelMap Mapping of channels to watching televisions.
+     * @param televisionMap Mapping of televisions to respective sockets.
      **/
     public ChimeManager(int portNumber, ChannelMap channelMap, TelevisionMap televisionMap) {
         try {
