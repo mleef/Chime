@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import DataStructures.ChannelMap;
 import DataStructures.TelevisionMap;
-import Messaging.Chime;
+import Messaging.ChimeMessage;
 import TV.Television;
 import com.google.gson.*;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import org.slf4j.Logger;
  */
 public class ChimeHandler extends Handler {
     private Socket televisionSocket;
-    private Chime chime;
+    private ChimeMessage chimeMessage;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
     private Gson gson;
@@ -28,13 +28,13 @@ public class ChimeHandler extends Handler {
     /**
      * Constructor for ChimeHandler class.
      * @param televisionSocket Socket of television that sent chime.
-     * @param chime Message being sent.
+     * @param chimeMessage Message being sent.
      * @param channelMap Mapping of channels to listening clients.
      * @param televisionMap Mapping of televisions to associated open sockets.
      **/
-    public ChimeHandler(Socket televisionSocket, Chime chime, ChannelMap channelMap, TelevisionMap televisionMap) {
+    public ChimeHandler(Socket televisionSocket, ChimeMessage chimeMessage, ChannelMap channelMap, TelevisionMap televisionMap) {
         this.televisionSocket = televisionSocket;
-        this.chime = chime;
+        this.chimeMessage = chimeMessage;
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;
         this.gson = new Gson();
@@ -46,7 +46,7 @@ public class ChimeHandler extends Handler {
      **/
     public void run() {
         // Get all TVs currently watching given message source channel
-        Set<Television> watchingTelevisions = channelMap.get(chime.getChannel());
+        Set<Television> watchingTelevisions = channelMap.get(chimeMessage.getChannel());
 
         logger.info(String.format("Preparing to broadcast message to %d viewers.", watchingTelevisions.size()));
 
@@ -66,7 +66,7 @@ public class ChimeHandler extends Handler {
                 } else {
                     // Write json output to socket stream
                     out = new OutputStreamWriter(currentSocket.getOutputStream(), StandardCharsets.UTF_8);
-                    out.write(gson.toJson(chime));
+                    out.write(gson.toJson(chimeMessage));
                     out.flush();
                     logger.info(String.format("Successfully sent Chime to %s.", television.getId()));
                 }

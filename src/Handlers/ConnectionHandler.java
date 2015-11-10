@@ -2,12 +2,14 @@ package Handlers;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 import DataStructures.ChannelMap;
 import DataStructures.TelevisionMap;
 import Messaging.*;
-import TV.Channel;
+import Messaging.ErrorMessage;
 import com.google.gson.*;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -47,27 +49,72 @@ public class ConnectionHandler extends Handler {
             BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
             // Deserialize message into Message object instance
-            Message message = gson.fromJson(in, Message.class);
+            ClientMessage clientMessage = gson.fromJson(in, ClientMessage.class);
 
-            // Get values contained in message to dispatch appropriate thread
-            Chime chime = message.getChime();
-            Registration registration = message.getRegistration();
-
-            // Dispatch appropriate worker thread based on message type
-            if(chime == null && registration != null) {
-                logger.info(String.format("REGISTRATION - FROM: %s, NEW CHANNEL: %s", registration.getTelevision().getId(), registration.getNewChannel().getId()));
-                logger.info("Dispatching new Register handler.");
-                new Thread(new RegisterHandler(client, registration, channelMap, televisionMap)).start();
-            } else if(registration == null && chime != null) {
-                logger.info(String.format("CHIME - CHANNEL: %s, FROM: %s, TIME SENT: %s MESSAGE: %s", chime.getChannel().getId(), chime.getSender().getId(), chime.getTimeSent(), chime.getMessage()));
-                logger.info("Dispatching new Chime handler.");
-                new Thread(new ChimeHandler(client, chime, channelMap, televisionMap)).start();
+            // Check for proper object properties
+            if(clientMessage == null  || !clientMessage.isValid()) {
+                logger.info("Aborting thread...");
+                sendError();
+                Thread.currentThread().interrupt();
+                return;
             }
 
+            // Get values contained in message to dispatch appropriate thread
+            ChimeMessage chimeMessage = clientMessage.getChimeMessage();
+            RegistrationMessage registrationMessage = clientMessage.getRegistrationMessage();
+
+            // Dispatch appropriate worker thread based on message type
+            if(!dispatchThread(chimeMessage, registrationMessage)) {
+                logger.info("Aborting thread...");
+                Thread.currentThread().interrupt();
+                return;
+            }
 
         } catch(Exception e) {
             logger.error(e.toString());
             e.printStackTrace();
         }
     }
+
+    private void sendError() {
+        // Log malformed request
+        logger.error("Malformed request");
+
+        // Send message to client indicating bad message
+        try {
+            OutputStreamWriter out = new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8);
+            out.write(gson.toJson(new ErrorMessage("Invalid Request", "Some properties are missing.")));
+            out.flush();
+        } catch(Exception e) {
+            logger.error(e.toString());
+            e.printStackTrace();
+        }
+    }
+
+    private boolean dispatchThread(ChimeMessage chimeMessage, RegistrationMessage registrationMessage) {
+        // Check for malformed requests
+        if(chimeMessage == null && registrationMessage == null) {
+            sendError();
+            return false;
+        }
+
+        // Dispatch appropriate thread based on message type
+        if(registrationMessage != null && registrationMessage.isValid()) {
+            logger.info(String.format("REGISTRATION - FROM: %s, NEW CHANNEL: %s", registrationMessage.getTelevision().getId(), registrationMessage.getNewChannel().getId()));
+            logger.info("Dispatching new Register handler.");
+            new Thread(new RegisterHandler(client, registrationMessage, channelMap, televisionMap)).start();
+        } else if(chimeMessage != null && chimeMessage.isValid()) {
+            logger.info(String.format("CHIME - CHANNEL: %s, FROM: %s, TIME SENT: %s MESSAGE: %s", chimeMessage.getChannel().getId(), chimeMessage.getSender().getId(), chimeMessage.getTimeSent(), chimeMessage.getMessage()));
+            logger.info("Dispatching new Chime handler.");
+            new Thread(new ChimeHandler(client, chimeMessage, channelMap, televisionMap)).start();
+        } else {
+            // If we've gotten here neither of the fields are valid
+            sendError();
+            return false;
+        }
+
+        return true;
+
+    }
+
 }

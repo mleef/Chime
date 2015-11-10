@@ -10,7 +10,7 @@ import java.util.Date;
  * Created by marcleef on 10/28/15.
  * Primary unit of messaging in the system.
  */
-public class Chime {
+public class ChimeMessage extends Message {
     private Channel channel;
     private String message;
     private Television sender;
@@ -21,11 +21,19 @@ public class Chime {
      * @param channel Channel message was sent from.
      * @param sender Television that sent the message.
      **/
-    public Chime(Channel channel, Television sender, String message, String timeSent) {
+    public ChimeMessage(Channel channel, Television sender, String message, String timeSent) {
         this.channel = channel;
         this.sender = sender;
         this.message = message;
         this.timeSent = timeSent;
+    }
+
+    /**
+     * Verifies that all fields of object have been deserialized properly.
+     * @return True if all fields aren't null, false otherwise.
+     **/
+    public boolean isValid() {
+        return (this.channel != null) && (this.sender != null) && (this.message != null) && (this.timeSent != null);
     }
 
     /**

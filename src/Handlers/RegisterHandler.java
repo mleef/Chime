@@ -2,15 +2,9 @@ package Handlers;
 
 import DataStructures.ChannelMap;
 import DataStructures.TelevisionMap;
-import Messaging.Registration;
-import TV.Channel;
-import TV.Television;
+import Messaging.RegistrationMessage;
 
-import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -21,7 +15,7 @@ import org.slf4j.Logger;
  */
 public class RegisterHandler extends Handler {
     private Socket televisionSocket;
-    private Registration registration;
+    private RegistrationMessage registrationMessage;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
     private Logger logger;
@@ -29,13 +23,13 @@ public class RegisterHandler extends Handler {
     /**
      * Constructor for ChimeHandler class.
      * @param televisionSocket Socket of tv making connection
-     * @param registration Registration object that stores channel switch info.
+     * @param registrationMessage Registration object that stores channel switch info.
      * @param channelMap Mapping of channels to listening clients.
      * @param televisionMap Mapping of televisions to associated open sockets.
      **/
-    public RegisterHandler(Socket televisionSocket, Registration registration, ChannelMap channelMap, TelevisionMap televisionMap) {
+    public RegisterHandler(Socket televisionSocket, RegistrationMessage registrationMessage, ChannelMap channelMap, TelevisionMap televisionMap) {
         this.televisionSocket = televisionSocket;
-        this.registration = registration;
+        this.registrationMessage = registrationMessage;
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;
         this.logger = LoggerFactory.getLogger(RegisterHandler.class);
@@ -46,20 +40,20 @@ public class RegisterHandler extends Handler {
      **/
     public void run() {
         // Add/update TV's socket
-        televisionMap.put(registration.getTelevision(), televisionSocket);
+        televisionMap.put(registrationMessage.getTelevision(), televisionSocket);
 
-        logger.info(String.format("Updating television (%s) socket (%s) in map.", registration.getTelevision().getId(), televisionSocket.toString()));
+        logger.info(String.format("Updating television (%s) socket (%s) in map.", registrationMessage.getTelevision().getId(), televisionSocket.toString()));
 
         // Remove tv from its previously associated channel list if it has one
-        if(registration.getPreviousChannel() != null) {
-            logger.info(String.format("Removing television (%s) from previous channel (%s).", registration.getPreviousChannel().getId(), registration.getTelevision().getId()));
-            channelMap.removeTV(registration.getPreviousChannel(), registration.getTelevision());
+        if(registrationMessage.getPreviousChannel() != null) {
+            logger.info(String.format("Removing television (%s) from previous channel (%s).", registrationMessage.getPreviousChannel().getId(), registrationMessage.getTelevision().getId()));
+            channelMap.removeTV(registrationMessage.getPreviousChannel(), registrationMessage.getTelevision());
         }
 
-        logger.info(String.format("Adding television (%s) to new channel (%s).", registration.getTelevision().getId(), registration.getNewChannel().getId()));
+        logger.info(String.format("Adding television (%s) to new channel (%s).", registrationMessage.getTelevision().getId(), registrationMessage.getNewChannel().getId()));
 
         // Update mappings with new channel
-        channelMap.putTV(registration.getNewChannel(), registration.getTelevision());
+        channelMap.putTV(registrationMessage.getNewChannel(), registrationMessage.getTelevision());
 
 
     }

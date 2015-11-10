@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 
 /**
  * Created by marcleef on 11/6/15.
+ * Main driver of the program.
  */
 public class ServerManager {
     public static void main(String[] args) {
@@ -20,7 +21,7 @@ public class ServerManager {
         Logger logger = LoggerFactory.getLogger(ServerManager.class);
 
         // Initialize chime manager and begin execution
-        ChimeManager chimeManager = new ChimeManager(portNumber,channelMap, televisionMap);
+        ChimeManager chimeManager = new ChimeManager(portNumber, channelMap, televisionMap);
         logger.info("Starting Chime Manager...");
         new Thread(chimeManager).start();
 
