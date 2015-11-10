@@ -89,12 +89,6 @@ public class ConnectionHandler extends Handler {
     }
 
     private void dispatchThread(ChimeMessage chimeMessage, RegistrationMessage registrationMessage) {
-        // Check for malformed requests
-        if(chimeMessage == null && registrationMessage == null) {
-            sendError("Both Chime and Registration messages are null");
-            return;
-        }
-
         // Dispatch appropriate thread based on message type
         if(registrationMessage != null && registrationMessage.isValid()) {
             logger.info(String.format("REGISTRATION - FROM: %s, NEW CHANNEL: %s", registrationMessage.getTelevision().getId(), registrationMessage.getNewChannel().getId()));
