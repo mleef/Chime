@@ -53,8 +53,8 @@ public class ConnectionHandler extends Handler {
 
             // Check for proper object properties
             if(clientMessage == null  || !clientMessage.isValid()) {
+                sendError("Invalid Client Message");
                 logger.info("Aborting thread...");
-                sendError();
                 Thread.currentThread().interrupt();
                 return;
             }
@@ -64,11 +64,8 @@ public class ConnectionHandler extends Handler {
             RegistrationMessage registrationMessage = clientMessage.getRegistrationMessage();
 
             // Dispatch appropriate worker thread based on message type
-            if(!dispatchThread(chimeMessage, registrationMessage)) {
-                logger.info("Aborting thread...");
-                Thread.currentThread().interrupt();
-                return;
-            }
+            dispatchThread(chimeMessage, registrationMessage);
+
 
         } catch(Exception e) {
             logger.error(e.toString());
@@ -76,9 +73,9 @@ public class ConnectionHandler extends Handler {
         }
     }
 
-    private void sendError() {
+    private void sendError(String error) {
         // Log malformed request
-        logger.error("Malformed request");
+        logger.error(String.format("Malformed request: %s", error));
 
         // Send message to client indicating bad message
         try {
@@ -91,11 +88,11 @@ public class ConnectionHandler extends Handler {
         }
     }
 
-    private boolean dispatchThread(ChimeMessage chimeMessage, RegistrationMessage registrationMessage) {
+    private void dispatchThread(ChimeMessage chimeMessage, RegistrationMessage registrationMessage) {
         // Check for malformed requests
         if(chimeMessage == null && registrationMessage == null) {
-            sendError();
-            return false;
+            sendError("Both Chime and Registration messages are null");
+            return;
         }
 
         // Dispatch appropriate thread based on message type
@@ -108,12 +105,8 @@ public class ConnectionHandler extends Handler {
             logger.info("Dispatching new Chime handler.");
             new Thread(new ChimeHandler(client, chimeMessage, channelMap, televisionMap)).start();
         } else {
-            // If we've gotten here neither of the fields are valid
-            sendError();
-            return false;
+            sendError("Malformed Registration/Chime Message");
         }
-
-        return true;
 
     }
 
