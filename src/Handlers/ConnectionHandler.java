@@ -105,7 +105,7 @@ public class ConnectionHandler extends Handler {
             logger.info("Dispatching new Chime handler.");
             new Thread(new ChimeHandler(client, chimeMessage, channelMap, televisionMap)).start();
         } else {
-            sendError("Malformed Registration/Chime Message");
+            sendError("Registration/Chime Message missing properties");
         }
 
     }
