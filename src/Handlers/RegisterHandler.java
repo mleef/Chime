@@ -5,6 +5,7 @@ import DataStructures.TelevisionMap;
 import Messaging.RegistrationMessage;
 
 import java.net.Socket;
+import java.nio.channels.SocketChannel;
 
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -14,7 +15,7 @@ import org.slf4j.Logger;
  * Handles the switching of channels and updates map accordingly.
  */
 public class RegisterHandler extends Handler {
-    private Socket televisionSocket;
+    private SocketChannel televisionSocket;
     private RegistrationMessage registrationMessage;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
@@ -27,7 +28,7 @@ public class RegisterHandler extends Handler {
      * @param channelMap Mapping of channels to listening clients.
      * @param televisionMap Mapping of televisions to associated open sockets.
      **/
-    public RegisterHandler(Socket televisionSocket, RegistrationMessage registrationMessage, ChannelMap channelMap, TelevisionMap televisionMap) {
+    public RegisterHandler(SocketChannel televisionSocket, RegistrationMessage registrationMessage, ChannelMap channelMap, TelevisionMap televisionMap) {
         this.televisionSocket = televisionSocket;
         this.registrationMessage = registrationMessage;
         this.channelMap = channelMap;
@@ -46,7 +47,7 @@ public class RegisterHandler extends Handler {
 
         // Remove tv from its previously associated channel list if it has one
         if(registrationMessage.getPreviousChannel() != null) {
-            logger.info(String.format("Removing television (%s) from previous channel (%s).", registrationMessage.getPreviousChannel().getId(), registrationMessage.getTelevision().getId()));
+            logger.info(String.format("Removing television (%s) from previous channel (%s).", registrationMessage.getTelevision().getId(), registrationMessage.getPreviousChannel().getId()));
             channelMap.removeTV(registrationMessage.getPreviousChannel(), registrationMessage.getTelevision());
         }
 

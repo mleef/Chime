@@ -25,10 +25,12 @@ public class ServerManager {
         logger.info("Starting Chime Manager...");
         new Thread(chimeManager).start();
 
+        /*
         // Start intermittent cleanup
         Timer timer = new Timer("Cleaner");
         logger.info("Starting Cleanup Manager...");
         timer.scheduleAtFixedRate(new CleanupManager(channelMap, televisionMap), 1000, 10000);
+        */
     }
 
 }

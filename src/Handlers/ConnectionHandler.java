@@ -1,15 +1,11 @@
 package Handlers;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
+import java.io.*;
+import java.nio.channels.SocketChannel;
 
 import DataStructures.ChannelMap;
 import DataStructures.TelevisionMap;
 import Messaging.*;
-import Messaging.ErrorMessage;
 import com.google.gson.*;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -19,11 +15,14 @@ import org.slf4j.Logger;
  * To handle connection and dispatch appropriate helper threads.
  */
 public class ConnectionHandler extends Handler {
-    private Socket client;
+    private SocketChannel client;
+    private String message;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
     private Gson gson;
     private Logger logger;
+    private InputStream inputStream;
+    private OutputStream outputStream;
 
 
     /**
@@ -32,10 +31,11 @@ public class ConnectionHandler extends Handler {
      * @param channelMap Mapping of channels to listening clients.
      * @param televisionMap Mapping of televisions to associated open sockets.
      **/
-    public ConnectionHandler(Socket client, ChannelMap channelMap, TelevisionMap televisionMap) {
+    public ConnectionHandler(SocketChannel client, String message, ChannelMap channelMap, TelevisionMap televisionMap) {
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;
         this.client = client;
+        this.message = message;
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(ConnectionHandler.class);
     }
@@ -46,13 +46,13 @@ public class ConnectionHandler extends Handler {
     public void run() {
         try {
             // Get socket's input stream
-            BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            // BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
             // Deserialize message into Message object instance
-            ClientMessage clientMessage = gson.fromJson(in, ClientMessage.class);
+            ClientMessage clientMessage = gson.fromJson(message, ClientMessage.class);
 
             // Check for proper object properties
-            if(clientMessage == null  || !clientMessage.isValid()) {
+            if (clientMessage == null || !clientMessage.isValid()) {
                 sendError("Invalid Client Message");
                 logger.info("Aborting thread...");
                 Thread.currentThread().interrupt();
@@ -66,7 +66,7 @@ public class ConnectionHandler extends Handler {
             // Dispatch appropriate worker thread based on message type
             dispatchThread(chimeMessage, registrationMessage);
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.error(e.toString());
             e.printStackTrace();
         }
@@ -76,15 +76,17 @@ public class ConnectionHandler extends Handler {
         // Log malformed request
         logger.error(String.format("Malformed request: %s", error));
 
+        /*
         // Send message to client indicating bad message
         try {
-            OutputStreamWriter out = new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8);
-            out.write(gson.toJson(new ErrorMessage("Invalid Request", "Some properties are missing.")));
-            out.flush();
+            //OutputStreamWriter out = new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8);
+            //out.write(gson.toJson(new ErrorMessage("Invalid Request", "Some properties are missing.")));
+            //out.flush();
         } catch(Exception e) {
             logger.error(e.toString());
             e.printStackTrace();
         }
+        */
     }
 
     private void dispatchThread(ChimeMessage chimeMessage, RegistrationMessage registrationMessage) {

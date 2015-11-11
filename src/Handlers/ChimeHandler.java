@@ -2,6 +2,8 @@ package Handlers;
 
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import DataStructures.ChannelMap;
@@ -17,7 +19,7 @@ import org.slf4j.Logger;
  * Handles sent messages by broadcasting them to listening clients.
  */
 public class ChimeHandler extends Handler {
-    private Socket televisionSocket;
+    private SocketChannel televisionSocket;
     private ChimeMessage chimeMessage;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
@@ -32,7 +34,7 @@ public class ChimeHandler extends Handler {
      * @param channelMap Mapping of channels to listening clients.
      * @param televisionMap Mapping of televisions to associated open sockets.
      **/
-    public ChimeHandler(Socket televisionSocket, ChimeMessage chimeMessage, ChannelMap channelMap, TelevisionMap televisionMap) {
+    public ChimeHandler(SocketChannel televisionSocket, ChimeMessage chimeMessage, ChannelMap channelMap, TelevisionMap televisionMap) {
         this.televisionSocket = televisionSocket;
         this.chimeMessage = chimeMessage;
         this.channelMap = channelMap;
@@ -51,7 +53,7 @@ public class ChimeHandler extends Handler {
         logger.info(String.format("Preparing to broadcast message to %d viewers.", watchingTelevisions.size()));
 
         // To write chimes to
-        Socket currentSocket;
+        SocketChannel currentSocket;
         OutputStreamWriter out;
 
         // Broadcast message to each watching television
@@ -60,15 +62,13 @@ public class ChimeHandler extends Handler {
             currentSocket = televisionMap.get(television);
             try {
                 // Check if connection is still alive
-                if(currentSocket.isClosed()) {
+                if(currentSocket.isConnected()) {
+                    // Write json output to socket stream
+                    currentSocket.write(ByteBuffer.wrap(gson.toJson(chimeMessage).toString().getBytes()));
+                    logger.info(String.format("Successfully sent Chime to %s.", television.getId()));
+                } else {
                     logger.error(String.format("Tried to broadcast to closed socket, removing %s from map.", television.getId()));
                     televisionMap.remove(television);
-                } else {
-                    // Write json output to socket stream
-                    out = new OutputStreamWriter(currentSocket.getOutputStream(), StandardCharsets.UTF_8);
-                    out.write(gson.toJson(chimeMessage));
-                    out.flush();
-                    logger.info(String.format("Successfully sent Chime to %s.", television.getId()));
                 }
 
             } catch(Exception e) {
