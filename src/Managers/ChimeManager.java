@@ -49,7 +49,7 @@ public class ChimeManager implements Runnable {
                 if (selector.select() <= 0) {
                     continue;
                 }
-                processReadySet(selector.selectedKeys());
+                processSelectedKeys(selector.selectedKeys());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -58,32 +58,33 @@ public class ChimeManager implements Runnable {
 
     /**
      * Responds accordingly to actions performed by selector keys.
-     * @param readySet Channel to associate new television object with.
+     * @param selectedKeys Channel to associate new television object with.
      * @throws Exception
      **/
-    public void processReadySet(Set readySet) throws Exception {
-        Iterator iterator = readySet.iterator();
+    public void processSelectedKeys(Set selectedKeys) throws Exception {
+        Iterator iterator = selectedKeys.iterator();
         while (iterator.hasNext()) {
             SelectionKey key = (SelectionKey) iterator.next();
             iterator.remove();
             if (key.isAcceptable()) {
-                logger.info("New connection...");
                 ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();
                 SocketChannel sChannel = ssChannel.accept();
                 sChannel.configureBlocking(false);
                 sChannel.register(key.selector(), SelectionKey.OP_READ);
+                logger.info(String.format("Received new connection: %s", sChannel.toString()));
+
             }
 
             if (key.isReadable()) {
                 SocketChannel sChannel = (SocketChannel) key.channel();
-                String msg = processRead(sChannel);
+                String msg = processSocketRead(sChannel);
 
                 if (msg.length() > 0) {
-                    logger.info("New readable data...");
+                    logger.info(String.format("New readable data from: %s", sChannel.toString()));
                     ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
                     new Thread(new ConnectionHandler(sChannel, msg, channelMap, televisionMap)).start();
                 } else {
-                    logger.info("Closed socket channel...");
+                    logger.info(String.format("Closed connection: %s", sChannel.toString()));
                     sChannel.close();
                 }
             }
@@ -95,7 +96,7 @@ public class ChimeManager implements Runnable {
      * @param sChannel Television that is being added to channel.
      * @return String representation of byte stream.
      **/
-    public String processRead(SocketChannel sChannel) throws Exception {
+    public String processSocketRead(SocketChannel sChannel) throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         int bytesCount = sChannel.read(buffer);
         if (bytesCount > 0) {

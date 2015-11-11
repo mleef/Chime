@@ -51,7 +51,7 @@ public class RegisterHandler extends Handler {
             channelMap.removeTV(registrationMessage.getPreviousChannel(), registrationMessage.getTelevision());
         }
 
-        logger.info(String.format("Adding television (%s) to new channel (%s).", registrationMessage.getTelevision().getId(), registrationMessage.getNewChannel().getId()));
+        logger.info(String.format("Adding television (%s) to channel (%s).", registrationMessage.getTelevision().getId(), registrationMessage.getNewChannel().getId()));
 
         // Update mappings with new channel
         channelMap.putTV(registrationMessage.getNewChannel(), registrationMessage.getTelevision());
