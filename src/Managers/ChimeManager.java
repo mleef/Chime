@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class ChimeManager implements Runnable {
+    private ServerSocketChannel serverChannel;
     private int portNumber;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
@@ -39,13 +40,19 @@ public class ChimeManager implements Runnable {
      **/
     public void run() {
         try {
+            // Initialize and configure server socket channel
             InetAddress hostIPAddress = InetAddress.getByName("localhost");
             Selector selector = Selector.open();
-            ServerSocketChannel ssChannel = ServerSocketChannel.open();
-            ssChannel.configureBlocking(false);
-            ssChannel.socket().bind(new InetSocketAddress(hostIPAddress, portNumber));
-            ssChannel.register(selector, SelectionKey.OP_ACCEPT);
+            serverChannel = ServerSocketChannel.open();
+            serverChannel.configureBlocking(false);
+            serverChannel.socket().bind(new InetSocketAddress(hostIPAddress, portNumber));
+
+            // Register server socket with selector
+            serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+
+            // Loop forever and wait for actions on selector keys
             while (true) {
+                // This blocks and waits for actions on keys, not a busy wait
                 if (selector.select() <= 0) {
                     continue;
                 }
@@ -64,26 +71,33 @@ public class ChimeManager implements Runnable {
     public void processSelectedKeys(Set selectedKeys) throws Exception {
         Iterator iterator = selectedKeys.iterator();
         while (iterator.hasNext()) {
+            // Store and remove key so we don't reprocess event
             SelectionKey key = (SelectionKey) iterator.next();
             iterator.remove();
+
+            // Check if key is acceptable and register new socket if so
             if (key.isAcceptable()) {
-                ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();
-                SocketChannel sChannel = ssChannel.accept();
+                // Register new socket channel
+                SocketChannel sChannel = serverChannel.accept();
                 sChannel.configureBlocking(false);
                 sChannel.register(key.selector(), SelectionKey.OP_READ);
                 logger.info(String.format("Received new connection: %s", sChannel.toString()));
 
             }
 
+            // Check if key has data to read
             if (key.isReadable()) {
+                // Get socket channel to read from and process message
                 SocketChannel sChannel = (SocketChannel) key.channel();
                 String msg = processSocketRead(sChannel);
-
+                // Data to read
                 if (msg.length() > 0) {
+                    // Dispatch new thread to handle data
                     logger.info(String.format("New readable data from: %s", sChannel.toString()));
                     ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
                     new Thread(new ConnectionHandler(sChannel, msg, channelMap, televisionMap)).start();
                 } else {
+                    // Close socket once its done transmitting
                     logger.info(String.format("Closed connection: %s", sChannel.toString()));
                     sChannel.close();
                 }

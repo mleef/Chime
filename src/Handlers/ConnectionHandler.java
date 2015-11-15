@@ -53,7 +53,7 @@ public class ConnectionHandler extends Handler {
 
             // Check for proper object properties
             if (clientMessage == null || !clientMessage.isValid()) {
-                sendError("Invalid Client Message");
+                logger.error("Invalid Client Message");
                 logger.info("Aborting thread...");
                 Thread.currentThread().interrupt();
                 return;
@@ -72,23 +72,6 @@ public class ConnectionHandler extends Handler {
         }
     }
 
-    private void sendError(String error) {
-        // Log malformed request
-        logger.error(String.format("Malformed request: %s", error));
-
-        /*
-        // Send message to client indicating bad message
-        try {
-            //OutputStreamWriter out = new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8);
-            //out.write(gson.toJson(new ErrorMessage("Invalid Request", "Some properties are missing.")));
-            //out.flush();
-        } catch(Exception e) {
-            logger.error(e.toString());
-            e.printStackTrace();
-        }
-        */
-    }
-
     private void dispatchThread(ChimeMessage chimeMessage, RegistrationMessage registrationMessage) {
         // Dispatch appropriate thread based on message type
         if(registrationMessage != null && registrationMessage.isValid()) {
@@ -100,7 +83,7 @@ public class ConnectionHandler extends Handler {
             logger.info("Dispatching new Chime handler.");
             new Thread(new ChimeHandler(client, chimeMessage, channelMap, televisionMap)).start();
         } else {
-            sendError("Registration/Chime Message missing properties");
+            logger.error("Registration/Chime Message missing properties");
         }
 
     }
