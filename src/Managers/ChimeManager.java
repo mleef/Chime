@@ -8,11 +8,13 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -69,6 +71,10 @@ public class ChimeManager implements Runnable {
      * @throws Exception
      **/
     public void processSelectedKeys(Set selectedKeys) throws Exception {
+        // To store socket channels and associated data
+        ArrayList<SocketChannel> sockets = new ArrayList<>();
+        ArrayList<String> messages = new ArrayList<>();
+
         Iterator iterator = selectedKeys.iterator();
         while (iterator.hasNext()) {
             // Store and remove key so we don't reprocess event
@@ -92,10 +98,10 @@ public class ChimeManager implements Runnable {
                 String msg = processSocketRead(sChannel);
                 // Data to read
                 if (msg.length() > 0) {
-                    // Dispatch new thread to handle data
                     logger.info(String.format("New readable data from: %s", sChannel.toString()));
-                    ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
-                    new Thread(new ConnectionHandler(sChannel, msg, channelMap, televisionMap)).start();
+                    // Collect socket and channel for later handling
+                    sockets.add(sChannel);
+                    messages.add(msg);
                 } else {
                     // Close socket once its done transmitting
                     logger.info(String.format("Closed connection: %s", sChannel.toString()));
@@ -103,6 +109,8 @@ public class ChimeManager implements Runnable {
                 }
             }
         }
+        // Dispatch thread to handle aggregated messages
+        new Thread(new ConnectionHandler(sockets, messages, channelMap, televisionMap)).start();
     }
 
     /**

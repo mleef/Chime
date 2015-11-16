@@ -2,6 +2,7 @@ package Handlers;
 
 import java.io.*;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 
 import DataStructures.ChannelMap;
 import DataStructures.TelevisionMap;
@@ -15,8 +16,8 @@ import org.slf4j.Logger;
  * To handle connection and dispatch appropriate helper threads.
  */
 public class ConnectionHandler extends Handler {
-    private SocketChannel client;
-    private String message;
+    private ArrayList<SocketChannel> clients;
+    private ArrayList<String> messages;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
     private Gson gson;
@@ -27,44 +28,51 @@ public class ConnectionHandler extends Handler {
 
     /**
      * Constructor for ChimeHandler class.
-     * @param client Socket of television that sent message.
+     * @param clients Socket of television that sent message.
      * @param channelMap Mapping of channels to listening clients.
      * @param televisionMap Mapping of televisions to associated open sockets.
      **/
-    public ConnectionHandler(SocketChannel client, String message, ChannelMap channelMap, TelevisionMap televisionMap) {
+    public ConnectionHandler(ArrayList<SocketChannel> clients, ArrayList<String> messages, ChannelMap channelMap, TelevisionMap televisionMap) {
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;
-        this.client = client;
-        this.message = message;
+        this.clients = clients;
+        this.messages = messages;
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(ConnectionHandler.class);
     }
 
     /**
-     * Determine content of client message and dispatch appropriate handler type.
+     * Determine content of client messages and dispatch appropriate handler type.
      **/
     public void run() {
         try {
-            // Get socket's input stream
-            // BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+            String curMessage;
+            SocketChannel curClient;
 
-            // Deserialize message into Message object instance
-            ClientMessage clientMessage = gson.fromJson(message, ClientMessage.class);
+            for(int i = 0; i < messages.size(); i++) {
+                // Set current message/client combination
+                curMessage = messages.get(i);
+                curClient = clients.get(i);
 
-            // Check for proper object properties
-            if (clientMessage == null || !clientMessage.isValid()) {
-                logger.error("Invalid Client Message");
-                logger.info("Aborting thread...");
-                Thread.currentThread().interrupt();
-                return;
+                // Deserialize message into Message object instance
+                ClientMessage clientMessage = gson.fromJson(curMessage, ClientMessage.class);
+
+                // Check for proper object properties
+                if (clientMessage == null || !clientMessage.isValid()) {
+                    logger.error("Invalid Client Message");
+                    logger.info("Aborting thread...");
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+
+                // Get values contained in message to dispatch appropriate thread
+                ChimeMessage chimeMessage = clientMessage.getChimeMessage();
+                RegistrationMessage registrationMessage = clientMessage.getRegistrationMessage();
+
+                // Dispatch appropriate worker thread based on message type
+                dispatchThread(curClient, chimeMessage, registrationMessage);
             }
 
-            // Get values contained in message to dispatch appropriate thread
-            ChimeMessage chimeMessage = clientMessage.getChimeMessage();
-            RegistrationMessage registrationMessage = clientMessage.getRegistrationMessage();
-
-            // Dispatch appropriate worker thread based on message type
-            dispatchThread(chimeMessage, registrationMessage);
 
         } catch (Exception e) {
             logger.error(e.toString());
@@ -72,7 +80,7 @@ public class ConnectionHandler extends Handler {
         }
     }
 
-    private void dispatchThread(ChimeMessage chimeMessage, RegistrationMessage registrationMessage) {
+    private void dispatchThread(SocketChannel client, ChimeMessage chimeMessage, RegistrationMessage registrationMessage) {
         // Dispatch appropriate thread based on message type
         if(registrationMessage != null && registrationMessage.isValid()) {
             logger.info(String.format("REGISTRATION - FROM: %s, NEW CHANNEL: %s", registrationMessage.getTelevision().getId(), registrationMessage.getNewChannel().getId()));
