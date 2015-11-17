@@ -5,6 +5,7 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
 import DataStructures.ChannelMap;
+import DataStructures.SocketMap;
 import DataStructures.TelevisionMap;
 import Messaging.*;
 import com.google.gson.*;
@@ -20,6 +21,7 @@ public class ConnectionHandler extends Handler {
     private ArrayList<String> messages;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
+    private SocketMap socketMap;
     private Gson gson;
     private Logger logger;
     private InputStream inputStream;
@@ -32,9 +34,10 @@ public class ConnectionHandler extends Handler {
      * @param channelMap Mapping of channels to listening clients.
      * @param televisionMap Mapping of televisions to associated open sockets.
      **/
-    public ConnectionHandler(ArrayList<SocketChannel> clients, ArrayList<String> messages, ChannelMap channelMap, TelevisionMap televisionMap) {
+    public ConnectionHandler(ArrayList<SocketChannel> clients, ArrayList<String> messages, ChannelMap channelMap, TelevisionMap televisionMap, SocketMap socketMap) {
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;
+        this.socketMap = socketMap;
         this.clients = clients;
         this.messages = messages;
         this.gson = new Gson();
@@ -85,11 +88,11 @@ public class ConnectionHandler extends Handler {
         if(registrationMessage != null && registrationMessage.isValid()) {
             logger.info(String.format("REGISTRATION - FROM: %s, NEW CHANNEL: %s", registrationMessage.getTelevision().getId(), registrationMessage.getNewChannel().getId()));
             logger.info("Dispatching new Register handler.");
-            new Thread(new RegisterHandler(client, registrationMessage, channelMap, televisionMap)).start();
+            new Thread(new RegisterHandler(client, registrationMessage, channelMap, televisionMap, socketMap)).start();
         } else if(chimeMessage != null && chimeMessage.isValid()) {
             logger.info(String.format("CHIME - CHANNEL: %s, FROM: %s, TIME SENT: %s MESSAGE: %s", chimeMessage.getChannel().getId(), chimeMessage.getSender().getId(), chimeMessage.getTimeSent(), chimeMessage.getMessage()));
             logger.info("Dispatching new Chime handler.");
-            new Thread(new ChimeHandler(client, chimeMessage, channelMap, televisionMap)).start();
+            new Thread(new ChimeHandler(client, chimeMessage, channelMap, televisionMap, socketMap)).start();
         } else {
             logger.error("Registration/Chime Message missing properties");
         }

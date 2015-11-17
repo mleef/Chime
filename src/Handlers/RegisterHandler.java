@@ -1,6 +1,7 @@
 package Handlers;
 
 import DataStructures.ChannelMap;
+import DataStructures.SocketMap;
 import DataStructures.TelevisionMap;
 import Messaging.RegistrationMessage;
 
@@ -19,6 +20,7 @@ public class RegisterHandler extends Handler {
     private RegistrationMessage registrationMessage;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
+    private SocketMap socketMap;
     private Logger logger;
 
     /**
@@ -28,11 +30,12 @@ public class RegisterHandler extends Handler {
      * @param channelMap Mapping of channels to listening clients.
      * @param televisionMap Mapping of televisions to associated open sockets.
      **/
-    public RegisterHandler(SocketChannel televisionSocket, RegistrationMessage registrationMessage, ChannelMap channelMap, TelevisionMap televisionMap) {
+    public RegisterHandler(SocketChannel televisionSocket, RegistrationMessage registrationMessage, ChannelMap channelMap, TelevisionMap televisionMap, SocketMap socketMap) {
         this.televisionSocket = televisionSocket;
         this.registrationMessage = registrationMessage;
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;
+        this.socketMap = socketMap;
         this.logger = LoggerFactory.getLogger(RegisterHandler.class);
     }
 
@@ -42,6 +45,7 @@ public class RegisterHandler extends Handler {
     public void run() {
         // Add/update TV's socket
         televisionMap.put(registrationMessage.getTelevision(), televisionSocket);
+        socketMap.put(televisionSocket, registrationMessage.getTelevision());
 
         logger.info(String.format("Updating television (%s) socket (%s) in map.", registrationMessage.getTelevision().getId(), televisionSocket.toString()));
 

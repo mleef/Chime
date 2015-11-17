@@ -1,38 +1,35 @@
 package DataStructures;
 
-import TV.Channel;
 import TV.Television;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.Socket;
 import java.nio.channels.SocketChannel;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by marcleef on 10/28/15.
- * Mapping of televisions to their open sockets.
+ * Created by marcleef on 11/16/15.
  */
-public final class TelevisionMap extends ConcurrentHashMap<Television, SocketChannel> {
+public class SocketMap extends ConcurrentHashMap<SocketChannel, Television> {
     private Logger logger;
 
     /**
-     * Constructor for ChannelMap class.
+     * Constructor for SocketMap class.
      **/
-    public TelevisionMap() {
+    public SocketMap() {
         super();
         this.logger = LoggerFactory.getLogger(ChannelMap.class);
     }
 
     @Override
-    public SocketChannel put(Television key, SocketChannel value) {
-        logger.info(String.format("Putting: (%s) -> (%s)", key.getId(), value.toString()));
+    public Television put(SocketChannel key, Television value) {
+        logger.info(String.format("Putting: (%s) -> (%s)", key.toString(), value.getId()));
         return super.put(key, value);
     }
 
     @Override
     public boolean remove(Object key, Object value) {
+
         if(this.contains(key)) {
             return super.remove(key, value);
         }

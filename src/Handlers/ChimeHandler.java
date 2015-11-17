@@ -7,6 +7,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import DataStructures.ChannelMap;
+import DataStructures.SocketMap;
 import DataStructures.TelevisionMap;
 import Messaging.ChimeMessage;
 import TV.Television;
@@ -23,6 +24,7 @@ public class ChimeHandler extends Handler {
     private ChimeMessage chimeMessage;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
+    private SocketMap socketMap;
     private Gson gson;
     private Logger logger;
 
@@ -34,11 +36,12 @@ public class ChimeHandler extends Handler {
      * @param channelMap Mapping of channels to listening clients.
      * @param televisionMap Mapping of televisions to associated open sockets.
      **/
-    public ChimeHandler(SocketChannel televisionSocket, ChimeMessage chimeMessage, ChannelMap channelMap, TelevisionMap televisionMap) {
+    public ChimeHandler(SocketChannel televisionSocket, ChimeMessage chimeMessage, ChannelMap channelMap, TelevisionMap televisionMap, SocketMap socketMap) {
         this.televisionSocket = televisionSocket;
         this.chimeMessage = chimeMessage;
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;
+        this.socketMap = socketMap;
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(ChimeHandler.class);
     }
@@ -68,7 +71,9 @@ public class ChimeHandler extends Handler {
                     logger.info(String.format("Successfully sent Chime to %s.", television.getId()));
                 } else {
                     logger.error(String.format("Tried to broadcast to closed socket, removing %s from map.", television.getId()));
+                    // Update television socket mappings
                     televisionMap.remove(television);
+                    socketMap.remove(currentSocket);
                 }
 
             } catch(Exception e) {
