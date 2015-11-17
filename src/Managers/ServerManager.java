@@ -5,8 +5,12 @@ import DataStructures.SocketMap;
 import DataStructures.TelevisionMap;
 
 import java.util.Timer;
+
+import org.glassfish.tyrus.server.Server;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+
+import javax.websocket.*;
 
 
 /**
@@ -15,6 +19,7 @@ import org.slf4j.Logger;
  */
 public class ServerManager {
     public static void main(String[] args) {
+
         // Create new data structures
         ChannelMap channelMap = new ChannelMap();
         TelevisionMap televisionMap = new TelevisionMap();
@@ -27,12 +32,6 @@ public class ServerManager {
         logger.info("Starting Chime Manager...");
         new Thread(chimeManager).start();
 
-        /*
-        // Start intermittent cleanup
-        Timer timer = new Timer("Cleaner");
-        logger.info("Starting Cleanup Manager...");
-        timer.scheduleAtFixedRate(new CleanupManager(channelMap, televisionMap), 1000, 10000);
-        */
     }
 
 }
