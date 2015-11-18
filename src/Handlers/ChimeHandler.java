@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Set;
 import DataStructures.ChannelMap;
 import DataStructures.SocketMap;
@@ -20,8 +21,8 @@ import org.slf4j.Logger;
  * Handles sent messages by broadcasting them to listening clients.
  */
 public class ChimeHandler extends Handler {
-    private SocketChannel televisionSocket;
-    private ChimeMessage chimeMessage;
+    private ArrayList<SocketChannel> televisionSockets;
+    private ArrayList<ChimeMessage> chimeMessages;
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
     private SocketMap socketMap;
@@ -31,14 +32,14 @@ public class ChimeHandler extends Handler {
 
     /**
      * Constructor for ChimeHandler class.
-     * @param televisionSocket Socket of television that sent chime.
-     * @param chimeMessage Message being sent.
+     * @param televisionSockets Sockets of television that sent chimes.
+     * @param chimeMessages Messages being sent.
      * @param channelMap Mapping of channels to listening clients.
      * @param televisionMap Mapping of televisions to associated open sockets.
      **/
-    public ChimeHandler(SocketChannel televisionSocket, ChimeMessage chimeMessage, ChannelMap channelMap, TelevisionMap televisionMap, SocketMap socketMap) {
-        this.televisionSocket = televisionSocket;
-        this.chimeMessage = chimeMessage;
+    public ChimeHandler(ArrayList<SocketChannel> televisionSockets, ArrayList<ChimeMessage> chimeMessages, ChannelMap channelMap, TelevisionMap televisionMap, SocketMap socketMap) {
+        this.televisionSockets = televisionSockets;
+        this.chimeMessages = chimeMessages;
         this.channelMap = channelMap;
         this.televisionMap = televisionMap;
         this.socketMap = socketMap;
@@ -50,37 +51,47 @@ public class ChimeHandler extends Handler {
      * Relay new message to all listening clients.
      **/
     public void run() {
-        // Get all TVs currently watching given message source channel
-        Set<Television> watchingTelevisions = channelMap.get(chimeMessage.getChannel());
+        ChimeMessage curChimeMessage;
+        SocketChannel curClient;
 
-        logger.info(String.format("Preparing to broadcast message to %d viewers.", watchingTelevisions.size()));
+        // Iterate through all messages/clients and send Chimes
+        for(int i = 0; i < chimeMessages.size(); i++) {
+            curChimeMessage = chimeMessages.get(i);
+            curClient = televisionSockets.get(i);
 
-        // To write chimes to
-        SocketChannel currentSocket;
-        OutputStreamWriter out;
+            // Get all TVs currently watching given message source channel
+            Set<Television> watchingTelevisions = channelMap.get(curChimeMessage.getChannel());
 
-        // Broadcast message to each watching television
-        for(Television television : watchingTelevisions) {
-            // Get socket associated with given television
-            currentSocket = televisionMap.get(television);
-            try {
-                // Check if connection is still alive
-                if(currentSocket.isConnected()) {
-                    // Write json output to socket stream
-                    currentSocket.write(ByteBuffer.wrap(gson.toJson(chimeMessage).toString().getBytes()));
-                    logger.info(String.format("Successfully sent Chime to %s.", television.getId()));
-                } else {
-                    logger.error(String.format("Tried to broadcast to closed socket, removing %s from map.", television.getId()));
-                    // Update television socket mappings
-                    televisionMap.remove(television);
-                    socketMap.remove(currentSocket);
+            logger.info(String.format("Preparing to broadcast message to %d viewers.", watchingTelevisions.size()));
+
+            // To write chimes to
+            SocketChannel currentSocket;
+            OutputStreamWriter out;
+
+            // Broadcast message to each watching television
+            for(Television television : watchingTelevisions) {
+                // Get socket associated with given television
+                currentSocket = televisionMap.get(television);
+                try {
+                    // Check if connection is still alive
+                    if(currentSocket.isConnected()) {
+                        // Write json output to socket stream
+                        currentSocket.write(ByteBuffer.wrap(gson.toJson(curChimeMessage).toString().getBytes()));
+                        logger.info(String.format("Successfully sent Chime to %s.", television.getId()));
+                    } else {
+                        logger.error(String.format("Tried to broadcast to closed socket, removing %s from map.", television.getId()));
+                        // Update television socket mappings
+                        televisionMap.remove(television);
+                        socketMap.remove(currentSocket);
+                    }
+
+                } catch(Exception e) {
+                    logger.error(e.toString());
+                    e.printStackTrace();
                 }
-
-            } catch(Exception e) {
-                logger.error(e.toString());
-                e.printStackTrace();
             }
         }
+
     }
 
 }
