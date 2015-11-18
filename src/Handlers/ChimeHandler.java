@@ -57,7 +57,7 @@ public class ChimeHandler extends Handler {
         // Iterate through all messages/clients and send Chimes
         for(int i = 0; i < chimeMessages.size(); i++) {
             curChimeMessage = chimeMessages.get(i);
-            curClient = televisionSockets.get(i);
+            //curClient = televisionSockets.get(i);
 
             // Get all TVs currently watching given message source channel
             Set<Television> watchingTelevisions = channelMap.get(curChimeMessage.getChannel());
@@ -87,7 +87,6 @@ public class ChimeHandler extends Handler {
 
                 } catch(Exception e) {
                     logger.error(e.toString());
-                    e.printStackTrace();
                 }
             }
         }

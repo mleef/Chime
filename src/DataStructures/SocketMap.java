@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by marcleef on 11/16/15.
+ * Mapping of socket channels to televisions.
  */
 public class SocketMap extends ConcurrentHashMap<SocketChannel, Television> {
     private Logger logger;
@@ -29,10 +30,7 @@ public class SocketMap extends ConcurrentHashMap<SocketChannel, Television> {
 
     @Override
     public boolean remove(Object key, Object value) {
-        if(this.contains(key)) {
-            return super.remove(key, value);
-        }
+        return this.contains(key) && super.remove(key, value);
 
-        return false;
     }
 }

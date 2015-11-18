@@ -84,6 +84,7 @@ public class ConnectionHandler extends Handler {
             }
 
             // Dispatch threads to handle new messages
+            logger.info("Dispatching Register and Chime handlers...");
             new Thread(new RegisterHandler(registrationClients, registrationMessages, channelMap, televisionMap, socketMap)).start();
             new Thread(new ChimeHandler(chimeClients, chimeMessages, channelMap, televisionMap, socketMap)).start();
 
@@ -97,14 +98,10 @@ public class ConnectionHandler extends Handler {
         // Update lists based on message type
         if(registrationMessage != null && registrationMessage.isValid()) {
             logger.info(String.format("REGISTRATION - FROM: %s, NEW CHANNEL: %s", registrationMessage.getTelevision().getId(), registrationMessage.getNewChannel().getId()));
-            //logger.info("Dispatching new Register handler.");
-            //new Thread(new RegisterHandler(client, registrationMessage, channelMap, televisionMap, socketMap)).start();
             registrationClients.add(client);
             registrationMessages.add(registrationMessage);
         } else if(chimeMessage != null && chimeMessage.isValid()) {
             logger.info(String.format("CHIME - CHANNEL: %s, FROM: %s, TIME SENT: %s MESSAGE: %s", chimeMessage.getChannel().getId(), chimeMessage.getSender().getId(), chimeMessage.getTimeSent(), chimeMessage.getMessage()));
-            //logger.info("Dispatching new Chime handler.");
-            //new Thread(new ChimeHandler(client, chimeMessage, channelMap, televisionMap, socketMap)).start();
             chimeClients.add(client);
             chimeMessages.add(chimeMessage);
         } else {
