@@ -30,7 +30,7 @@ public class SocketMap extends ConcurrentHashMap<SocketChannel, Television> {
 
     @Override
     public boolean remove(Object key, Object value) {
-        return this.contains(key) && super.remove(key, value);
+        return (key != null && value != null) && this.contains(key) && super.remove(key, value);
 
     }
 }

@@ -4,8 +4,6 @@ import TV.Television;
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.channels.SocketChannel;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -31,6 +29,7 @@ public class WebSocketMap extends ConcurrentHashMap<WebSocket, Television> {
 
     @Override
     public boolean remove(Object key, Object value) {
-        return this.contains(key) && super.remove(key, value);
+
+        return (key != null && value != null) && this.contains(key) && super.remove(key, value);
     }
 }

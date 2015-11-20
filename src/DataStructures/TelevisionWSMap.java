@@ -31,6 +31,7 @@ public class TelevisionWSMap extends ConcurrentHashMap<Television, WebSocket> {
 
     @Override
     public boolean remove(Object key, Object value) {
-        return this.contains(key) && super.remove(key, value);
+
+        return (key != null && value != null) && this.contains(key) && super.remove(key, value);
     }
 }

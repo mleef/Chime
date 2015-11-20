@@ -139,15 +139,16 @@ public class ChimeManagerWS extends WebSocketServer implements Runnable {
             currentSocket = televisionWSMap.get(television);
             try {
                 // Check if connection is still alive
-                if(currentSocket.isOpen()) {
+                if(currentSocket != null && currentSocket.isOpen()) {
                     // Write json output to socket stream
                     currentSocket.send(ByteBuffer.wrap(gson.toJson(chimeMessage).toString().getBytes()));
                     logger.info(String.format("Successfully sent Chime to %s.", television.getId()));
                 } else {
                     logger.error(String.format("Tried to broadcast to closed socket, removing %s from map.", television.getId()));
-                    // Update television socket mappings
+                    // Update television socket/channel mappings
                     televisionWSMap.remove(television);
                     webSocketMap.remove(currentSocket);
+                    channelMap.remove(chimeMessage.getChannel(), television);
                 }
 
             } catch(Exception e) {

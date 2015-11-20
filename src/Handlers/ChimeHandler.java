@@ -74,7 +74,7 @@ public class ChimeHandler extends Handler {
                 currentSocket = televisionMap.get(television);
                 try {
                     // Check if connection is still alive
-                    if(currentSocket.isConnected()) {
+                    if(currentSocket != null && currentSocket.isConnected()) {
                         // Write json output to socket stream
                         currentSocket.write(ByteBuffer.wrap(gson.toJson(curChimeMessage).toString().getBytes()));
                         logger.info(String.format("Successfully sent Chime to %s.", television.getId()));
@@ -83,6 +83,7 @@ public class ChimeHandler extends Handler {
                         // Update television socket mappings
                         televisionMap.remove(television);
                         socketMap.remove(currentSocket);
+                        channelMap.removeTV(curChimeMessage.getChannel(), television);
                     }
 
                 } catch(Exception e) {
