@@ -24,8 +24,11 @@ public class ConnectionHandler extends Handler {
     private SocketMap socketMap;
     private Gson gson;
     private Logger logger;
-    private InputStream inputStream;
-    private OutputStream outputStream;
+    private ArrayList<SocketChannel> registrationClients;
+    private ArrayList<SocketChannel> chimeClients;
+    private ArrayList<RegistrationMessage> registrationMessages;
+    private ArrayList<ChimeMessage> chimeMessages;
+
 
 
     /**
@@ -42,6 +45,10 @@ public class ConnectionHandler extends Handler {
         this.messages = messages;
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(ConnectionHandler.class);
+        this.registrationClients = new ArrayList<>();
+        this.chimeClients = new ArrayList<>();
+        this.registrationMessages = new ArrayList<>();
+        this.chimeMessages = new ArrayList<>();
     }
 
     /**
@@ -72,10 +79,14 @@ public class ConnectionHandler extends Handler {
                 ChimeMessage chimeMessage = clientMessage.getChimeMessage();
                 RegistrationMessage registrationMessage = clientMessage.getRegistrationMessage();
 
-                // Dispatch appropriate worker thread based on message type
-                dispatchThread(curClient, chimeMessage, registrationMessage);
+                // Classify message to populate lists
+                classifyMessage(curClient, chimeMessage, registrationMessage);
             }
 
+            // Dispatch threads to handle new messages
+            logger.info("Dispatching Register and Chime handlers...");
+            new Thread(new RegisterHandler(registrationClients, registrationMessages, channelMap, televisionMap, socketMap)).start();
+            new Thread(new ChimeHandler(chimeClients, chimeMessages, channelMap, televisionMap, socketMap)).start();
 
         } catch (Exception e) {
             logger.error(e.toString());
@@ -83,16 +94,16 @@ public class ConnectionHandler extends Handler {
         }
     }
 
-    private void dispatchThread(SocketChannel client, ChimeMessage chimeMessage, RegistrationMessage registrationMessage) {
-        // Dispatch appropriate thread based on message type
+    private void classifyMessage(SocketChannel client, ChimeMessage chimeMessage, RegistrationMessage registrationMessage) {
+        // Update lists based on message type
         if(registrationMessage != null && registrationMessage.isValid()) {
             logger.info(String.format("REGISTRATION - FROM: %s, NEW CHANNEL: %s", registrationMessage.getTelevision().getId(), registrationMessage.getNewChannel().getId()));
-            logger.info("Dispatching new Register handler.");
-            new Thread(new RegisterHandler(client, registrationMessage, channelMap, televisionMap, socketMap)).start();
+            registrationClients.add(client);
+            registrationMessages.add(registrationMessage);
         } else if(chimeMessage != null && chimeMessage.isValid()) {
             logger.info(String.format("CHIME - CHANNEL: %s, FROM: %s, TIME SENT: %s MESSAGE: %s", chimeMessage.getChannel().getId(), chimeMessage.getSender().getId(), chimeMessage.getTimeSent(), chimeMessage.getMessage()));
-            logger.info("Dispatching new Chime handler.");
-            new Thread(new ChimeHandler(client, chimeMessage, channelMap, televisionMap, socketMap)).start();
+            chimeClients.add(client);
+            chimeMessages.add(chimeMessage);
         } else {
             logger.error("Registration/Chime Message missing properties");
         }

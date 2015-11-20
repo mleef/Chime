@@ -91,7 +91,6 @@ public class ChimeManager implements Runnable {
                 sChannel.configureBlocking(false);
                 sChannel.register(key.selector(), SelectionKey.OP_READ);
                 logger.info(String.format("Received new connection: %s", sChannel.toString()));
-
             }
 
             // Check if key has data to read
@@ -110,8 +109,10 @@ public class ChimeManager implements Runnable {
                     logger.info(String.format("Closed connection: %s", sChannel.toString()));
                     sChannel.close();
                     // Update mappings to avoid leaks
-                    televisionMap.remove(socketMap.get(sChannel));
-                    socketMap.remove(sChannel);
+                    if(socketMap.contains(sChannel)) {
+                        televisionMap.remove(socketMap.get(sChannel));
+                        socketMap.remove(sChannel);
+                    }
                 }
             }
         }
