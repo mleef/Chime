@@ -41,7 +41,6 @@ public class ChimeHandler extends Handler {
      * Relay new message to all listening clients.
      **/
     public void run() {
-        logger.info("Beginning Chime broadcast...");
         // Iterate through all messages/clients and send Chimes
         for(ChimeMessage message : chimeMessages) {
             sender.sendChimes(message);

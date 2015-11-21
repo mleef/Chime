@@ -60,8 +60,10 @@ public class MapManager {
      **/
     public void clearTelevisionWS(WebSocket socket) {
         logger.info(String.format("Removing %s.", socket.toString()));
-        televisionWSMap.remove(webSocketMap.get(socket));
-        webSocketMap.remove(socket);
+        if(webSocketMap.contains(socket)) {
+            televisionWSMap.remove(webSocketMap.get(socket));
+            webSocketMap.remove(socket);
+        }
     }
 
     /**
@@ -70,8 +72,10 @@ public class MapManager {
      **/
     public void clearTelevision(SocketChannel socket) {
         logger.info(String.format("Removing %s.", socket.toString()));
-        televisionMap.remove(socketMap.get(socket));
-        socketMap.remove(socket);
+        if(socketMap.contains(socket)) {
+            televisionMap.remove(socketMap.get(socket));
+            socketMap.remove(socket);
+        }
     }
 
     /**

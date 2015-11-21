@@ -84,9 +84,14 @@ public class ConnectionHandler extends Handler {
             }
 
             // Dispatch threads to handle new messages
-            logger.info("Dispatching Register and Chime handlers...");
-            new Thread(new RegisterHandler(registrationClients, registrationMessages, mapper)).start();
-            new Thread(new ChimeHandler(chimeMessages, sender)).start();
+            if(registrationMessages.size() > 0) {
+                logger.info("Dispatching Register handler...");
+                new Thread(new RegisterHandler(registrationClients, registrationMessages, mapper)).start();
+            }
+            if(chimeMessages.size() > 0) {
+                logger.info("Dispatching Chime handler...");
+                new Thread(new ChimeHandler(chimeMessages, sender)).start();
+            }
 
         } catch (Exception e) {
             logger.error(e.toString());
