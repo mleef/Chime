@@ -4,6 +4,7 @@ import DataStructures.*;
 
 import java.util.Timer;
 
+import Messaging.MessageSender;
 import org.glassfish.tyrus.server.Server;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -25,18 +26,24 @@ public class ServerManager {
         SocketMap socketMap = new SocketMap();
         WebSocketMap webSocketMap = new WebSocketMap();
 
+        // For managing mapping updates
+        MapManager mapper = new MapManager(channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap);
+
+        // For sending messages to clients
+        MessageSender sender = new MessageSender(mapper, channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap);
+
         // Set port and logger
         int portNumber = 4444;
         Logger logger = LoggerFactory.getLogger(ServerManager.class);
 
         // Initialize socket based chime manager and begin execution
-        ChimeManager chimeManager = new ChimeManager(portNumber, channelMap, televisionMap, socketMap);
+        ChimeManager chimeManager = new ChimeManager(portNumber, sender, mapper);
         logger.info(String.format("Starting Chime Manager on port %d...", portNumber));
         new Thread(chimeManager).start();
 
         // Initialize web socket based chime manager and begin execution
         try {
-            ChimeManagerWS chimeManagerWS = new ChimeManagerWS(portNumber + 1, channelMap, televisionWSMap, webSocketMap);
+            ChimeManagerWS chimeManagerWS = new ChimeManagerWS(portNumber + 1, sender, mapper);
             logger.info(String.format("Starting Chime Manager WS on port %d...", portNumber + 1));
             chimeManagerWS.start();
         } catch(Exception e) {

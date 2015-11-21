@@ -13,6 +13,7 @@ import java.util.concurrent.Exchanger;
 import DataStructures.*;
 import Messaging.ChimeMessage;
 import Messaging.ClientMessage;
+import Messaging.MessageSender;
 import Messaging.RegistrationMessage;
 import TV.Television;
 import com.google.gson.Gson;
@@ -28,21 +29,17 @@ import org.slf4j.LoggerFactory;
  * Logic for the web socket flavor of the Chime Manager.
  */
 public class ChimeManagerWS extends WebSocketServer implements Runnable {
-    private int portNumber;
-    private ChannelMap channelMap;
-    private TelevisionWSMap televisionWSMap;
-    private WebSocketMap webSocketMap;
     private Gson gson;
     private Logger logger;
+    private MessageSender sender;
+    private MapManager mapManager;
 
-    public ChimeManagerWS(int port, ChannelMap channelMap, TelevisionWSMap televisionWSMap, WebSocketMap webSocketMap) throws UnknownHostException {
+    public ChimeManagerWS(int port, MessageSender sender, MapManager mapManager) throws UnknownHostException {
         super( new InetSocketAddress( port ) );
-        this.portNumber = port;
-        this.channelMap = channelMap;
-        this.televisionWSMap = televisionWSMap;
-        this.webSocketMap = webSocketMap;
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(ChimeManagerWS.class);
+        this.sender = sender;
+        this.mapManager = mapManager;
     }
 
     @Override
@@ -53,10 +50,7 @@ public class ChimeManagerWS extends WebSocketServer implements Runnable {
     @Override
     public void onClose( WebSocket conn, int code, String reason, boolean remote ) {
         logger.info("Closed Connection: " + conn);
-        if(webSocketMap.contains(conn)) {
-            televisionWSMap.remove(webSocketMap.get(conn));
-            webSocketMap.remove(conn);
-        }
+        mapManager.clearTelevisionWS(conn);
 
     }
 
@@ -105,56 +99,11 @@ public class ChimeManagerWS extends WebSocketServer implements Runnable {
     }
 
     private void updateMappings(WebSocket connection, RegistrationMessage registrationMessage) {
-        // Add/update TV's socket
-        televisionWSMap.put(registrationMessage.getTelevision(), connection);
-        webSocketMap.put(connection, registrationMessage.getTelevision());
-
-        logger.info(String.format("Updating television (%s) socket (%s) in map.", registrationMessage.getTelevision().getId(), connection.toString()));
-
-        // Remove tv from its previously associated channel list if it has one
-        if(registrationMessage.getPreviousChannel() != null) {
-            logger.info(String.format("Removing television (%s) from previous channel (%s).", registrationMessage.getTelevision().getId(), registrationMessage.getPreviousChannel().getId()));
-            channelMap.removeTV(registrationMessage.getPreviousChannel(), registrationMessage.getTelevision());
-        }
-
-        logger.info(String.format("Adding television (%s) to channel (%s).", registrationMessage.getTelevision().getId(), registrationMessage.getNewChannel().getId()));
-
-        // Update mappings with new channel
-        channelMap.putTV(registrationMessage.getNewChannel(), registrationMessage.getTelevision());
+        mapManager.moveTelevision(registrationMessage, connection);
     }
 
     private void sendChimes(ChimeMessage chimeMessage) {
-        // Get all TVs currently watching given message source channel
-        Set<Television> watchingTelevisions = channelMap.get(chimeMessage.getChannel());
-
-        logger.info(String.format("Preparing to broadcast message to %d viewers.", watchingTelevisions.size()));
-
-        // To write chimes to
-        WebSocket currentSocket;
-        OutputStreamWriter out;
-
-        // Broadcast message to each watching television
-        for(Television television : watchingTelevisions) {
-            // Get socket associated with given television
-            currentSocket = televisionWSMap.get(television);
-            try {
-                // Check if connection is still alive
-                if(currentSocket != null && currentSocket.isOpen()) {
-                    // Write json output to socket stream
-                    currentSocket.send(ByteBuffer.wrap(gson.toJson(chimeMessage).toString().getBytes()));
-                    logger.info(String.format("Successfully sent Chime to %s.", television.getId()));
-                } else {
-                    logger.error(String.format("Tried to broadcast to closed socket, removing %s from map.", television.getId()));
-                    // Update television socket/channel mappings
-                    televisionWSMap.remove(television);
-                    webSocketMap.remove(currentSocket);
-                    channelMap.remove(chimeMessage.getChannel(), television);
-                }
-
-            } catch(Exception e) {
-                logger.error(e.toString());
-            }
-        }
+        sender.sendChimes(chimeMessage);
     }
 
 

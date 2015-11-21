@@ -1,15 +1,12 @@
 package Managers;
 
-import DataStructures.ChannelMap;
-import DataStructures.SocketMap;
-import DataStructures.TelevisionMap;
 import Handlers.ConnectionHandler;
+import Messaging.MessageSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -22,22 +19,18 @@ import java.util.Set;
 public class ChimeManager implements Runnable {
     private ServerSocketChannel serverChannel;
     private int portNumber;
-    private ChannelMap channelMap;
-    private TelevisionMap televisionMap;
-    private SocketMap socketMap;
     private Logger logger;
+    private MessageSender sender;
+    private MapManager mapper;
 
     /**
      * Constructor for the CleanupManager class.
-     * @param channelMap Mapping of channels to watching televisions.
-     * @param televisionMap Mapping of televisions to respective sockets.
      **/
-    public ChimeManager(int portNumber, ChannelMap channelMap, TelevisionMap televisionMap, SocketMap socketMap) {
+    public ChimeManager(int portNumber, MessageSender sender, MapManager mapper) {
         this.portNumber = portNumber;
-        this.channelMap = channelMap;
-        this.televisionMap = televisionMap;
-        this.socketMap = socketMap;
         this.logger = LoggerFactory.getLogger(ChimeManager.class);
+        this.sender = sender;
+        this.mapper = mapper;
     }
 
     /**
@@ -109,15 +102,12 @@ public class ChimeManager implements Runnable {
                     logger.info(String.format("Closed connection: %s", sChannel.toString()));
                     sChannel.close();
                     // Update mappings to avoid leaks
-                    if(socketMap.contains(sChannel)) {
-                        televisionMap.remove(socketMap.get(sChannel));
-                        socketMap.remove(sChannel);
-                    }
+                    mapper.clearTelevision(sChannel);
                 }
             }
         }
         // Dispatch thread to handle aggregated messages
-        new Thread(new ConnectionHandler(sockets, messages, channelMap, televisionMap, socketMap)).start();
+        new Thread(new ConnectionHandler(sockets, messages, sender, mapper)).start();
     }
 
     /**

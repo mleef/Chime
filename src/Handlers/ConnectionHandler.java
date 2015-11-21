@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import DataStructures.ChannelMap;
 import DataStructures.SocketMap;
 import DataStructures.TelevisionMap;
+import Managers.MapManager;
 import Messaging.*;
 import com.google.gson.*;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ public class ConnectionHandler extends Handler {
     private SocketMap socketMap;
     private Gson gson;
     private Logger logger;
+    private MessageSender sender;
+    private MapManager mapper;
     private ArrayList<SocketChannel> registrationClients;
     private ArrayList<SocketChannel> chimeClients;
     private ArrayList<RegistrationMessage> registrationMessages;
@@ -34,13 +37,8 @@ public class ConnectionHandler extends Handler {
     /**
      * Constructor for ChimeHandler class.
      * @param clients Socket of television that sent message.
-     * @param channelMap Mapping of channels to listening clients.
-     * @param televisionMap Mapping of televisions to associated open sockets.
      **/
-    public ConnectionHandler(ArrayList<SocketChannel> clients, ArrayList<String> messages, ChannelMap channelMap, TelevisionMap televisionMap, SocketMap socketMap) {
-        this.channelMap = channelMap;
-        this.televisionMap = televisionMap;
-        this.socketMap = socketMap;
+    public ConnectionHandler(ArrayList<SocketChannel> clients, ArrayList<String> messages, MessageSender sender, MapManager mapper) {
         this.clients = clients;
         this.messages = messages;
         this.gson = new Gson();
@@ -49,6 +47,8 @@ public class ConnectionHandler extends Handler {
         this.chimeClients = new ArrayList<>();
         this.registrationMessages = new ArrayList<>();
         this.chimeMessages = new ArrayList<>();
+        this.sender = sender;
+        this.mapper = mapper;
     }
 
     /**
@@ -85,8 +85,8 @@ public class ConnectionHandler extends Handler {
 
             // Dispatch threads to handle new messages
             logger.info("Dispatching Register and Chime handlers...");
-            new Thread(new RegisterHandler(registrationClients, registrationMessages, channelMap, televisionMap, socketMap)).start();
-            new Thread(new ChimeHandler(chimeClients, chimeMessages, channelMap, televisionMap, socketMap)).start();
+            new Thread(new RegisterHandler(registrationClients, registrationMessages, mapper)).start();
+            new Thread(new ChimeHandler(chimeMessages, sender)).start();
 
         } catch (Exception e) {
             logger.error(e.toString());

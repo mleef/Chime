@@ -42,12 +42,12 @@ window.onload = function () {
 		console.log("connection opened.");
 		socket.send(JSON.stringify(registration));
 		socket.send(JSON.stringify(chime));
-	}
+	};
 	
 	socket.onmessage = function (message) {
 		console.log("response received");
 		console.log(message);
-	}
+	};
 	
 	var channel = tizen.tvchannel.getCurrentChannel();
 	console.log(channel);
