@@ -52,7 +52,7 @@ public class ConnectionHandler extends Handler {
     }
 
     /**
-     * Determine content of client messages and dispatch appropriate handler type.
+     * Determine content of client messages and dispatch appropriate handler type(s).
      **/
     public void run() {
         try {
@@ -99,6 +99,12 @@ public class ConnectionHandler extends Handler {
         }
     }
 
+    /**
+     * Populates lists of chimes and registrations based on message type.
+     * @param client Socket of given client.
+     * @param chimeMessage Potentially null chime message to classify.
+     * @param registrationMessage Potentially null registration message.
+     **/
     private void classifyMessage(SocketChannel client, ChimeMessage chimeMessage, RegistrationMessage registrationMessage) {
         // Update lists based on message type
         if(registrationMessage != null && registrationMessage.isValid()) {

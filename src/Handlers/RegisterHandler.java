@@ -40,13 +40,9 @@ public class RegisterHandler extends Handler {
      * Dispatch thread to adjust television mappings to reflect channel/socket changes.
      **/
     public void run() {
-        RegistrationMessage curRegistrationMessage;
-        SocketChannel curClient;
-
+        // Adjust mappings according to new registration messages
         for(int i = 0; i < registrationMessages.size(); i++) {
-            curRegistrationMessage = registrationMessages.get(i);
-            curClient = televisionSockets.get(i);
-            mapper.moveTelevision(curRegistrationMessage, curClient);
+            mapper.moveTelevision(registrationMessages.get(i), televisionSockets.get(i));
         }
     }
 }
