@@ -21,7 +21,6 @@ public class MapManager {
     private TelevisionMap televisionMap;
     private TelevisionWSMap televisionWSMap;
     private WebSocketMap webSocketMap;
-    private Gson gson;
     private Logger logger;
 
     /**
@@ -38,7 +37,6 @@ public class MapManager {
         this.webSocketMap = webSocketMap;
         this.televisionMap = televisionMap;
         this.televisionWSMap = televisionWSMap;
-        this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(MapManager.class);
     }
 

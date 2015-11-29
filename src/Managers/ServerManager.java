@@ -25,7 +25,7 @@ public class ServerManager {
         MapManager mapper = new MapManager(channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap);
 
         // For sending messages to clients
-        MessageSender sender = new MessageSender(mapper, channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap);
+        MessageSender sender = new MessageSender(mapper, channelMap, televisionMap, televisionWSMap);
 
         // Set port and logger
         int portNumber = 4444;

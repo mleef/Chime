@@ -19,10 +19,8 @@ import java.util.Set;
  */
 public class MessageSender {
     private ChannelMap channelMap;
-    private SocketMap socketMap;
     private TelevisionMap televisionMap;
     private TelevisionWSMap televisionWSMap;
-    private WebSocketMap webSocketMap;
     private Gson gson;
     private Logger logger;
     private MapManager mapper;
@@ -31,15 +29,11 @@ public class MessageSender {
      * Constructor for the MessageSender class.
      * @param mapper Handles mapping changes.
      * @param channelMap Mapping of channels to watching televisions.
-     * @param socketMap Mapping of sockets to associated televisions.
-     * @param webSocketMap Mapping of web sockets to associated televisions.
      * @param televisionMap Mapping of televisions to associated sockets.
      * @param televisionWSMap Mapping of televisions to associated web sockets.
      **/
-    public MessageSender(MapManager mapper, ChannelMap channelMap, SocketMap socketMap, WebSocketMap webSocketMap, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap) {
+    public MessageSender(MapManager mapper, ChannelMap channelMap, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap) {
         this.channelMap = channelMap;
-        this.socketMap = socketMap;
-        this.webSocketMap = webSocketMap;
         this.televisionMap = televisionMap;
         this.televisionWSMap = televisionWSMap;
         this.gson = new Gson();

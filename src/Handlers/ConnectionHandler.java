@@ -28,7 +28,6 @@ public class ConnectionHandler extends Handler {
     private MessageSender sender;
     private MapManager mapper;
     private ArrayList<SocketChannel> registrationClients;
-    private ArrayList<SocketChannel> chimeClients;
     private ArrayList<RegistrationMessage> registrationMessages;
     private ArrayList<ChimeMessage> chimeMessages;
 
@@ -44,7 +43,6 @@ public class ConnectionHandler extends Handler {
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(ConnectionHandler.class);
         this.registrationClients = new ArrayList<>();
-        this.chimeClients = new ArrayList<>();
         this.registrationMessages = new ArrayList<>();
         this.chimeMessages = new ArrayList<>();
         this.sender = sender;
@@ -113,7 +111,6 @@ public class ConnectionHandler extends Handler {
             registrationMessages.add(registrationMessage);
         } else if(chimeMessage != null && chimeMessage.isValid()) {
             logger.info(String.format("CHIME - CHANNEL: %s, FROM: %s, TIME SENT: %s MESSAGE: %s", chimeMessage.getChannel().getId(), chimeMessage.getSender().getId(), chimeMessage.getTimeSent(), chimeMessage.getMessage()));
-            chimeClients.add(client);
             chimeMessages.add(chimeMessage);
         } else {
             logger.error("Registration/Chime Message missing properties");

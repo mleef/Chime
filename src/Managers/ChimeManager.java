@@ -66,7 +66,7 @@ public class ChimeManager implements Runnable {
      * @param selectedKeys Channel to associate new television object with.
      * @throws Exception
      **/
-    public void processSelectedKeys(Set selectedKeys) throws Exception {
+    private void processSelectedKeys(Set selectedKeys) throws Exception {
         // To store socket channels and associated data
         ArrayList<SocketChannel> sockets = new ArrayList<>();
         ArrayList<String> messages = new ArrayList<>();
@@ -115,7 +115,7 @@ public class ChimeManager implements Runnable {
      * @param sChannel Television that is being added to channel.
      * @return String representation of byte stream.
      **/
-    public String processSocketRead(SocketChannel sChannel) throws Exception {
+    private String processSocketRead(SocketChannel sChannel) throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(1024);
         int bytesCount = sChannel.read(buffer);
         if (bytesCount > 0) {
