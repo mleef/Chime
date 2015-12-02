@@ -42,10 +42,10 @@ public class MessageSender {
     }
 
     /**
-     * Removes television object from containing maps (web sockets).
+     * Broadcast messages to clients
      * @param chimeMessage Message to relay to watching clients.
      **/
-    public void sendChimes(ChimeMessage chimeMessage) {
+    public void broadcast(ChimeMessage chimeMessage) {
         // Get corresponding channel
         Channel channel = chimeMessage.getChannel();
 

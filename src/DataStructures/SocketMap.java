@@ -28,8 +28,4 @@ public class SocketMap extends ConcurrentHashMap<SocketChannel, Television> {
         return super.put(key, value);
     }
 
-    @Override
-    public boolean remove(Object key, Object value) {
-        return (key != null && value != null) && this.contains(key) && super.remove(key, value);
-    }
 }

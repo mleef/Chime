@@ -31,12 +31,4 @@ public final class TelevisionMap extends ConcurrentHashMap<Television, SocketCha
         return super.put(key, value);
     }
 
-    @Override
-    public boolean remove(Object key, Object value) {
-        if(this.contains(key)) {
-            return super.remove(key, value);
-        }
-
-        return false;
-    }
 }

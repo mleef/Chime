@@ -103,7 +103,7 @@ public class ChimeManagerWS extends WebSocketServer implements Runnable {
     }
 
     private void sendChimes(ChimeMessage chimeMessage) {
-        sender.sendChimes(chimeMessage);
+        sender.broadcast(chimeMessage);
     }
 
 

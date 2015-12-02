@@ -43,7 +43,7 @@ public class ChimeHandler extends Handler {
     public void run() {
         // Iterate through all messages/clients and send Chimes
         for(ChimeMessage message : chimeMessages) {
-            sender.sendChimes(message);
+            sender.broadcast(message);
         }
 
 
