@@ -53,10 +53,9 @@ public class MessageSender {
         Set<Television> watchingTelevisions = channelMap.get(channel);
 
         logger.info(String.format("Broadcasting %s to %d clients...", chimeMessage.getMessage(), watchingTelevisions.size()));
-
         for(Television television : watchingTelevisions) {
             // Check if given television is using a web socket
-            if (televisionWSMap.contains(television)) {
+            if (televisionWSMap.containsKey(television)) {
                 // If socket write fails update maps accordingly
                 if (!writeToSocket(televisionWSMap.get(television), chimeMessage)) {
                     mapper.clearTelevisionWS(channel, television);
@@ -64,7 +63,7 @@ public class MessageSender {
             }
 
             // Check if given television is using a normal socket
-            if (televisionMap.contains(television)) {
+            if (televisionMap.containsKey(television)) {
                 // If socket write fails update maps accordingly
                 if (!writeToSocket(televisionMap.get(television), chimeMessage)) {
                     mapper.clearTelevision(channel, television);
@@ -81,7 +80,7 @@ public class MessageSender {
      **/
     public boolean writeToSocket(WebSocket socket, ChimeMessage chimeMessage) {
         try {
-            socket.send(ByteBuffer.wrap(gson.toJson(chimeMessage).toString().getBytes()));
+            socket.send((gson.toJson(chimeMessage).toString()));
             logger.info(String.format("Successfully wrote message to %s", socket.toString()));
             return true;
         } catch(Exception e) {

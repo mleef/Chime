@@ -6,6 +6,8 @@ import Messaging.MessageSender;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
+import java.util.Timer;
+
 
 /**
  * Created by marcleef on 11/6/15.
@@ -45,6 +47,11 @@ public class ServerManager {
             logger.error(e.toString());
             e.printStackTrace();
         }
+
+        // Start intermittent statistics generation
+        // Timer timer = new Timer("Stats");
+        // logger.info("Starting Stats Manager...");
+        // timer.scheduleAtFixedRate(new StatsManager(channelMap, televisionMap), 1000, 10000);
 
     }
 

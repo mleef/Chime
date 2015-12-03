@@ -121,7 +121,7 @@ public class MapManager {
     public void addTelevisionToChannel(Television television, Channel previousChannel, Channel newChannel) {
         // Remove tv from its previously associated channel list if it has one
         if(previousChannel != null) {
-            logger.info(String.format("Removing television (%s) from previous channel (%s).", television.getId(), television.getId()));
+            logger.info(String.format("Removing television (%s) from previous channel (%s).", television.getId(), previousChannel.getId()));
             channelMap.removeTV(previousChannel, television);
         }
 
