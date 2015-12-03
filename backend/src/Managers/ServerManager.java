@@ -6,8 +6,6 @@ import Messaging.MessageSender;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
-import java.util.Timer;
-
 
 /**
  * Created by marcleef on 11/6/15.

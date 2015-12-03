@@ -1,13 +1,8 @@
 package Handlers;
 
-import DataStructures.ChannelMap;
-import DataStructures.SocketMap;
-import DataStructures.TelevisionMap;
 import Managers.MapManager;
-import Messaging.MessageSender;
 import Messaging.RegistrationMessage;
 
-import java.net.Socket;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 

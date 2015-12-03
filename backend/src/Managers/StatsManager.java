@@ -3,7 +3,6 @@ package Managers;
 import DataStructures.ChannelMap;
 import DataStructures.TelevisionMap;
 
-import java.util.Arrays;
 import java.util.TimerTask;
 
 import TV.Channel;

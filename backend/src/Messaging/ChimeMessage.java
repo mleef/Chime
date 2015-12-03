@@ -3,9 +3,6 @@ package Messaging;
 import TV.Channel;
 import TV.Television;
 
-import java.sql.Timestamp;
-import java.util.Date;
-
 /**
  * Created by marcleef on 10/28/15.
  * Primary unit of messaging in the system.
