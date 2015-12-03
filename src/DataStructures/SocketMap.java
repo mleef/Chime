@@ -19,7 +19,7 @@ public class SocketMap extends ConcurrentHashMap<SocketChannel, Television> {
      **/
     public SocketMap() {
         super();
-        this.logger = LoggerFactory.getLogger(ChannelMap.class);
+        this.logger = LoggerFactory.getLogger(SocketMap.class);
     }
 
     @Override

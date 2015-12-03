@@ -22,7 +22,7 @@ public final class TelevisionMap extends ConcurrentHashMap<Television, SocketCha
      **/
     public TelevisionMap() {
         super();
-        this.logger = LoggerFactory.getLogger(ChannelMap.class);
+        this.logger = LoggerFactory.getLogger(TelevisionMap.class);
     }
 
     @Override
