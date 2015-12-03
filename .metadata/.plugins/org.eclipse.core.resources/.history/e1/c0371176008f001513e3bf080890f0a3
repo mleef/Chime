@@ -1,0 +1,58 @@
+
+window.onload = function () {
+    // TODO:: Do your initialization job
+
+	console.log("Reached js");
+	var registration = {
+		registrationMessage: {
+			previousChannel: null,
+			newChannel: {id: "1"},
+			television: {id: "2"}
+		}
+	};
+
+	var chime = {
+		chimeMessage : {
+			channel : {id : "1"}, 
+			television : {id : "2"},
+			message : "Test message.",
+			timeSent : "1000"
+		}
+	};
+
+	if (navigator.onLine) {
+		console.log("TV is online");
+	} else {
+		console.log("TV not online");
+	}
+	
+	var socket = new WebSocket('ws://ec2-54-152-59-214.compute-1.amazonaws.com:4445');
+	socket.onopen = function () {
+		console.log("connection opened.");
+		socket.send(JSON.stringify(registration));
+	}
+	
+	socket.onmessage = function (message) {
+		console.log("response received");
+		alert(message);
+		console.log(message);
+	}
+	
+
+    // add eventListener for tizenhwkey
+    document.addEventListener('tizenhwkey', function(e) {
+        if(e.keyName === "back")
+			try {
+			    tizen.application.getCurrentApplication().exit();
+			} catch (ignore) {
+			}
+    	});
+
+    // Sample code
+    var textbox = document.querySelector('.contents');
+    textbox.addEventListener("click", function(){
+    	box = document.querySelector('#textbox');
+    	box.innerHTML = box.innerHTML == "Basic" ? "Sample" : "Basic";
+    });
+    
+};
