@@ -57,7 +57,7 @@ public class MapManager {
      **/
     public void clearTelevisionWS(WebSocket socket) {
         logger.info(String.format("Removing %s.", socket.toString()));
-        if(webSocketMap.contains(socket)) {
+        if(webSocketMap.containsKey(socket)) {
             televisionWSMap.remove(webSocketMap.get(socket));
             webSocketMap.remove(socket);
         }
@@ -69,7 +69,7 @@ public class MapManager {
      **/
     public void clearTelevision(SocketChannel socket) {
         logger.info(String.format("Removing %s.", socket.toString()));
-        if(socketMap.contains(socket)) {
+        if(socketMap.containsKey(socket)) {
             televisionMap.remove(socketMap.get(socket));
             socketMap.remove(socket);
         }
