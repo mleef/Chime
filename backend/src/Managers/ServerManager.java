@@ -49,7 +49,7 @@ public class ServerManager {
 
         // Initialize RESTful API interface to handle HTTP requests
         ChimeRestManager chimeRestManager = new ChimeRestManager(sender, mapper, channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap);
-        logger.info(String.format("Starting Chime REST Manager on port %4567...", portNumber));
+        logger.info(String.format("Starting Chime REST Manager on port %d...", 4567));
         new Thread(chimeRestManager).start();
 
         // Start intermittent statistics generation
