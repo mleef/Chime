@@ -18,16 +18,16 @@ import org.slf4j.LoggerFactory;
  * Created by marcleef on 11/17/15.
  * Logic for the web socket flavor of the Chime Manager.
  */
-public class ChimeManagerWS extends WebSocketServer implements Runnable {
+public class ChimeWebSocketManager extends WebSocketServer implements Runnable {
     private Gson gson;
     private Logger logger;
     private MessageSender sender;
     private MapManager mapManager;
 
-    public ChimeManagerWS(int port, MessageSender sender, MapManager mapManager) throws UnknownHostException {
+    public ChimeWebSocketManager(int port, MessageSender sender, MapManager mapManager) throws UnknownHostException {
         super( new InetSocketAddress( port ) );
         this.gson = new Gson();
-        this.logger = LoggerFactory.getLogger(ChimeManagerWS.class);
+        this.logger = LoggerFactory.getLogger(ChimeWebSocketManager.class);
         this.sender = sender;
         this.mapManager = mapManager;
     }

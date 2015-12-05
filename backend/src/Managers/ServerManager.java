@@ -5,7 +5,7 @@ import DataStructures.*;
 import Messaging.MessageSender;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
-
+import static spark.Spark.*;
 
 /**
  * Created by marcleef on 11/6/15.
@@ -32,19 +32,25 @@ public class ServerManager {
         Logger logger = LoggerFactory.getLogger(ServerManager.class);
 
         // Initialize socket based chime manager and begin execution
-        ChimeManager chimeManager = new ChimeManager(portNumber, sender, mapper);
-        logger.info(String.format("Starting Chime Manager on port %d...", portNumber));
-        new Thread(chimeManager).start();
+        ChimeSocketManager chimeSocketManager = new ChimeSocketManager(portNumber, sender, mapper);
+        logger.info(String.format("Starting Chime Socket Manager on port %d...", portNumber));
+        new Thread(chimeSocketManager).start();
 
         // Initialize web socket based chime manager and begin execution
         try {
-            ChimeManagerWS chimeManagerWS = new ChimeManagerWS(portNumber + 1, sender, mapper);
-            logger.info(String.format("Starting Chime Manager WS on port %d...", portNumber + 1));
-            chimeManagerWS.start();
+            ChimeWebSocketManager chimeWebSocketManager = new ChimeWebSocketManager(portNumber + 1, sender, mapper);
+            logger.info(String.format("Starting Chime WebSocket Manager on port %d...", portNumber + 1));
+            chimeWebSocketManager.start();
         } catch(Exception e) {
             logger.error(e.toString());
             e.printStackTrace();
         }
+
+
+        // Initialize RESTful API interface to handle HTTP requests
+        ChimeRestManager chimeRestManager = new ChimeRestManager(sender, mapper, channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap);
+        logger.info(String.format("Starting Chime REST Manager on port %4567...", portNumber));
+        new Thread(chimeRestManager).start();
 
         // Start intermittent statistics generation
         // Timer timer = new Timer("Stats");

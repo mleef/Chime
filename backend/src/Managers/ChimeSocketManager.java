@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
-public class ChimeManager implements Runnable {
+public class ChimeSocketManager implements Runnable {
     private ServerSocketChannel serverChannel;
     private int portNumber;
     private Logger logger;
@@ -26,9 +26,9 @@ public class ChimeManager implements Runnable {
     /**
      * Constructor for the CleanupManager class.
      **/
-    public ChimeManager(int portNumber, MessageSender sender, MapManager mapper) {
+    public ChimeSocketManager(int portNumber, MessageSender sender, MapManager mapper) {
         this.portNumber = portNumber;
-        this.logger = LoggerFactory.getLogger(ChimeManager.class);
+        this.logger = LoggerFactory.getLogger(ChimeSocketManager.class);
         this.sender = sender;
         this.mapper = mapper;
     }
