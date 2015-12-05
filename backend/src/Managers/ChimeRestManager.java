@@ -1,11 +1,16 @@
 package Managers;
 import DataStructures.*;
-import Messaging.MessageSender;
+import Messaging.*;
 import TV.Channel;
 import TV.Television;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static spark.Spark.*;
 
@@ -41,21 +46,83 @@ public class ChimeRestManager implements Runnable {
         this.televisionMap = televisionMap;
         this.televisionWSMap = televisionWSMap;
         gson = new Gson();
-        this.logger = LoggerFactory.getLogger(MapManager.class);
+        this.logger = LoggerFactory.getLogger(ChimeRestManager.class);
     }
 
     public void run() {
-        // Get televisions watching queried channel
-        get("/channel/watching/:channel", (request, response) -> gson.toJson(channelMap.get(new Channel(request.params(":channel")))));
+        // Get total viewers on all channels
+        get("/channel/count/all", (request, response) -> {
+            logger.info("GET VIEWERS - ALL");
+            try {
+                return gson.toJson(channelMap.getTotalViewers());
+            } catch (Exception e) {
+                logger.error(e.toString());
+                return gson.toJson(new ErrorMessage(e.toString()));
+            }
+        });
 
         // Get number of viewers on given channel
-        get("/channel/count/:channel", (request, response) -> gson.toJson(channelMap.getChannelViewers(new Channel(request.params(":channel")))));
+        get("/channel/count/:channel", (request, response) -> {
+            logger.info(String.format("GET # VIEWERS - %s", request.params(":channel")));
+            try {
+                return gson.toJson(channelMap.getChannelViewers(new Channel(request.params(":channel"))));
+            } catch (Exception e) {
+                logger.error(e.toString());
+                return gson.toJson(new ErrorMessage(e.toString()));
+            }
+
+        });
+
+        // Get televisions watching queried channel
+        get("/channel/watching/:channel", (request, response) -> {
+            logger.info(String.format("GET VIEWERS - %s", request.params(":channel")));
+            try {
+                return gson.toJson(channelMap.get(new Channel(request.params(":channel"))));
+            } catch (Exception e) {
+                logger.error(e.toString());
+                return gson.toJson(new ErrorMessage(e.toString()));
+            }
+        });
 
         // Process registration messages from client
-        post("/television/registration/:television/:previousChannel/:newChannel", (request, response) -> {
-            mapper.addTelevisionToChannel(new Television(request.params(":television")), new Channel(request.params("previousChannel")), new Channel(request.params("newChannel")));
-            return gson.toJson(channelMap.get(new Channel(request.params("newChannel"))));
+        post("/television/register", (request, response) -> {
+            logger.info(String.format("POST REGISTRATION - %s: (%s -> %s)", request.params(":television"), request.params(":previousChannel"), request.params(":newChannel")));
+            try {
+                RegistrationMessage registrationMessage = gson.fromJson(request.body(), RegistrationMessage.class);
+                mapper.addTelevisionToChannel(registrationMessage.getTelevision(), registrationMessage.getPreviousChannel(), registrationMessage.getNewChannel());
+                return gson.toJson(new SuccessMessage("Registration confirmed"));
+            } catch(Exception e) {
+                logger.error(e.toString());
+                return gson.toJson(new ErrorMessage(e.toString()));
+            }
         });
+
+        // Remove television from channel
+        delete("/television/register/:television/:channel", (request, response) -> {
+            logger.info(String.format("POST REGISTRATION - %s: (%s -> %s)", request.params(":television"), request.params(":previousChannel"), request.params(":newChannel")));
+            try {
+                mapper.clearTelevision(new Channel(request.params(":channel")), new Television(request.params(":television")));
+                return gson.toJson(new SuccessMessage("Television removed from channel"));
+            } catch(Exception e) {
+                logger.error(e.toString());
+                return gson.toJson(new ErrorMessage(e.toString()));
+            }
+        });
+
+        // Send Chimes
+        post("/television/chime", (request, response) -> {
+            logger.info("POST CHIME");
+            try {
+                sender.broadcast(gson.fromJson(request.body(), ClientMessage.class).getChimeMessage());
+                return gson.toJson(new SuccessMessage("Chime sent"));
+            } catch(Exception e) {
+                logger.error(e.toString());
+                return gson.toJson(new ErrorMessage(e.toString()));
+            }
+        });
+
+
+
 
 
     }

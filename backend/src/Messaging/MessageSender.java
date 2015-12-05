@@ -49,8 +49,13 @@ public class MessageSender {
         // Get corresponding channel
         Channel channel = chimeMessage.getChannel();
 
-        // Get all TVs currently watching given message source channel
-        Set<Television> watchingTelevisions = channelMap.get(channel);
+        Set<Television> watchingTelevisions;
+        if(channelMap.containsKey(channel)) {
+            // Get all TVs currently watching given message source channel
+            watchingTelevisions = channelMap.get(channel);
+        } else {
+            return;
+        }
 
         logger.info(String.format("Broadcasting %s to %d clients...", chimeMessage.getMessage(), watchingTelevisions.size()));
         for(Television television : watchingTelevisions) {
