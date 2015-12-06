@@ -2,7 +2,7 @@ package Messaging;
 
 /**
  * Created by marcleef on 11/9/15.
- * To handle error messages relayed to the client.
+ * To handle success messages relayed to the client.
  */
 public class SuccessMessage extends Message {
     private String success;

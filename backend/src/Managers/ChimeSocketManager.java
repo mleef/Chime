@@ -24,7 +24,10 @@ public class ChimeSocketManager implements Runnable {
     private MapManager mapper;
 
     /**
-     * Constructor for the CleanupManager class.
+     * Constructor for the ChimeSocketManager class.
+     * @param  portNumber Port to listen on.
+     * @param sender To handle messaging.
+     * @param mapper To handle map updates.
      **/
     public ChimeSocketManager(int portNumber, MessageSender sender, MapManager mapper) {
         this.portNumber = portNumber;
@@ -39,7 +42,6 @@ public class ChimeSocketManager implements Runnable {
     public void run() {
         try {
             // Initialize and configure server socket channel
-            InetAddress hostIPAddress = InetAddress.getByName("localhost");
             Selector selector = Selector.open();
             serverChannel = ServerSocketChannel.open();
             serverChannel.configureBlocking(false);
