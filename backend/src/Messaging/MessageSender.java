@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -46,6 +47,9 @@ public class MessageSender {
      * @param chimeMessage Message to relay to watching clients.
      **/
     public void broadcast(ChimeMessage chimeMessage) {
+        boolean exists = false;
+        ArrayList<Television> televisionsToRemove = new ArrayList<>();
+
         // Get corresponding channel
         Channel channel = chimeMessage.getChannel();
 
@@ -58,9 +62,11 @@ public class MessageSender {
         }
 
         logger.info(String.format("Broadcasting %s to %d clients...", chimeMessage.getMessage(), watchingTelevisions.size()));
+
         for(Television television : watchingTelevisions) {
             // Check if given television is using a web socket
             if (televisionWSMap.containsKey(television)) {
+                exists = true;
                 // If socket write fails update maps accordingly
                 if (!writeToSocket(televisionWSMap.get(television), chimeMessage)) {
                     mapper.clearTelevisionWS(channel, television);
@@ -69,11 +75,23 @@ public class MessageSender {
 
             // Check if given television is using a normal socket
             if (televisionMap.containsKey(television)) {
+                exists = true;
                 // If socket write fails update maps accordingly
                 if (!writeToSocket(televisionMap.get(television), chimeMessage)) {
                     mapper.clearTelevision(channel, television);
                 }
             }
+
+            // Remove from channel mapping if it doesn't exist
+            if(!exists) {
+                televisionsToRemove.add(television);
+            }
+            exists = false;
+        }
+
+        // Remove all closed connection televisions from map
+        for(Television television : televisionsToRemove) {
+            channelMap.removeTV(channel, television);
         }
     }
 

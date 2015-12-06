@@ -3,8 +3,8 @@ package DataStructures;
 import TV.Channel;
 import TV.Television;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.LoggerFactory;
@@ -24,6 +24,14 @@ public class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
     public ChannelMap() {
         super();
         this.logger = LoggerFactory.getLogger(ChannelMap.class);
+    }
+
+    /**
+     * Gets list of all channels.
+     * @return All channels in map.
+     **/
+    public ArrayList<Channel> getChannels() {
+        return new ArrayList<>(this.keySet());
     }
 
     /**

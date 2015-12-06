@@ -50,6 +50,36 @@ public class ChimeRestManager implements Runnable {
     }
 
     public void run() {
+
+        // Allow cross origin requests
+        options("/*", (request,response)->{
+            String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
+            if (accessControlRequestHeaders != null) {
+                response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
+            }
+
+            String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
+            if(accessControlRequestMethod != null){
+                response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
+            }
+            return "OK";
+        });
+
+        before((request,response)->{
+            response.header("Access-Control-Allow-Origin", "*");
+        });
+
+        // Get list of all channels
+        get("/channel/list", (request, response) -> {
+            logger.info("GET CHANNELS - ALL");
+            try {
+                return gson.toJson(channelMap.getChannels());
+            } catch (Exception e) {
+                logger.error(e.toString());
+                return gson.toJson(new ErrorMessage(e.toString()));
+            }
+        });
+
         // Get total viewers on all channels
         get("/channel/count/all", (request, response) -> {
             logger.info("GET VIEWERS - ALL");

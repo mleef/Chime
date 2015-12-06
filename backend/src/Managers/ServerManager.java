@@ -3,6 +3,7 @@ package Managers;
 import DataStructures.*;
 
 import Messaging.MessageSender;
+import TV.Channel;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import static spark.Spark.*;
