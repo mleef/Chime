@@ -92,7 +92,17 @@ public class ChimeSocketManager implements Runnable {
             if (key.isReadable()) {
                 // Get socket channel to read from and process message
                 SocketChannel sChannel = (SocketChannel) key.channel();
-                String msg = processSocketRead(sChannel);
+
+                String msg = "";
+                // Handle dead connections
+                try {
+                    msg = processSocketRead(sChannel);
+                } catch(Exception e) {
+                    logger.error(e.toString());
+                    sChannel.close();
+                    mapper.clearTelevision(sChannel);
+                }
+
                 // Data to read
                 if (msg.length() > 0) {
                     logger.info(String.format("New readable data from: %s", sChannel.toString()));
@@ -119,10 +129,12 @@ public class ChimeSocketManager implements Runnable {
      **/
     private String processSocketRead(SocketChannel sChannel) throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(1024);
-        int bytesCount = sChannel.read(buffer);
-        if (bytesCount > 0) {
-            buffer.flip();
-            return new String(buffer.array()).trim();
+        if(sChannel.isConnected()) {
+            int bytesCount = sChannel.read(buffer);
+            if (bytesCount > 0) {
+                buffer.flip();
+                return new String(buffer.array()).trim();
+            }
         }
         return "";
     }

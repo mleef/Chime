@@ -28,4 +28,12 @@ public final class TelevisionMap extends ConcurrentHashMap<Television, SocketCha
         return super.put(key, value);
     }
 
+    /**
+     * Number of viewers in the map.
+     * @return # of viewers.
+     **/
+    public int getViewers() {
+        return this.keySet().size();
+    }
+
 }

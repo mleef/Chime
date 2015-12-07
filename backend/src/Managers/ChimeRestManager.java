@@ -80,11 +80,11 @@ public class ChimeRestManager implements Runnable {
             }
         });
 
-        // Get total viewers on all channels
+        // Get total (active) viewers on all channels
         get("/channel/count/all", (request, response) -> {
             logger.info("GET VIEWERS - ALL");
             try {
-                return gson.toJson(channelMap.getTotalViewers());
+                return gson.toJson(televisionMap.getViewers() + televisionWSMap.getViewers());
             } catch (Exception e) {
                 logger.error(e.toString());
                 return gson.toJson(new ErrorMessage(e.toString()));
