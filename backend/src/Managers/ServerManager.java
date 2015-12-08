@@ -17,6 +17,11 @@ public class ServerManager {
 
         // Create new data structures
         ChannelMap channelMap = new ChannelMap();
+        // For testing
+        channelMap.addChannel(new Channel("ESPN"));
+        channelMap.addChannel(new Channel("NBC"));
+        channelMap.addChannel(new Channel("CNN"));
+        channelMap.addChannel(new Channel("TNT"));
         TelevisionMap televisionMap = new TelevisionMap();
         TelevisionWSMap televisionWSMap = new TelevisionWSMap();
         SocketMap socketMap = new SocketMap();
