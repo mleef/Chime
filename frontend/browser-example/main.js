@@ -1,6 +1,7 @@
 var socket;
 var ENDPOINT = 'http://ec2-54-152-59-214.compute-1.amazonaws.com:4567';
 var GET_CHANNELS = ENDPOINT + '/channel/list';
+var GET_VIEWERS = ENDPOINT + '/channel/count/';
 var curChannel = "1";
 var prevChannel = null;
 
@@ -80,6 +81,14 @@ window.onload = function () {
         });
     }
 
+    var updateInfo = function() {
+        $.get( GET_VIEWERS + curChannel, function( data ) {
+            var num = JSON.parse(data);
+            console.log(num);
+            $("#viewers").text("Watching: " + num);
+        });
+    }
+
     updateChannels();
     //setInterval(updateChannels, 10000);
 
@@ -98,9 +107,9 @@ window.onload = function () {
         prevChannel = curChannel;
         socket.send(JSON.stringify(registration));
 
+        updateInfo();
         $('#video').empty();
         $('#video').append("<div id=\"player\"></div>");
-        //$('#video').append("<iframe width=\"640\" height=\"390\"src=\"" + videos[curChannel]  + "\"></iframe>");
 
         var player = new YT.Player('player', {
             height: '390',
