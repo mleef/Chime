@@ -3,14 +3,19 @@
 <head>
     <script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type="text/javascript" src="main.js"> </script>
+    <script type="text/css" src="style.css"> </script>
 </head>
 <body>
-<select id="channelList"></select>
-<marquee id="ticker" behavior="scroll" direction="left"
-         height="20px"
-         loop="1">
-    Hover to stop!
-</marquee>
+    <select id="channelList">
+        <option disabled selected> -- select an option -- </option>
+    </select>
+    <input id="send" type="text"><input type="submit">
+
+    <marquee id="ticker" behavior="scroll" direction="left"
+             height="20px"
+             loop="1">
+        Hover to stop!
+    </marquee>
 </body>
 </html>
 
