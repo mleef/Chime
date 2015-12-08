@@ -3,15 +3,22 @@
 <head>
     <script language="javascript" type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script type="text/javascript" src="main.js"> </script>
-    <script type="text/css" src="style.css"> </script>
+    <script type="text/javascript" src="yt.js"> </script>
+    <link rel="stylesheet" type="style.css" href="style.css">
 </head>
 <body>
-    <select id="channelList">
-        <option disabled selected> -- select an option -- </option>
-    </select>
-    <input id="send" type="text"><input type="submit">
-
-    <div id="ticker"></div>
+    <div id="app">
+        <div id ="video">
+            <div id="player"></div>
+        </div>
+        <div id="userInput">
+            <select id="channelList">
+                <option disabled selected> -- select a channel -- </option>
+            </select>
+            <input id="send" type="text" style="width: 68%;"><input type="submit">
+        </div>
+        <div id="ticker"></div>
+    </div>
 </body>
 </html>
 

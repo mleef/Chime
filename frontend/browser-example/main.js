@@ -4,6 +4,14 @@ var GET_CHANNELS = ENDPOINT + '/channel/list';
 var curChannel = "1";
 var prevChannel = null;
 
+var videos = {
+    ESPN : "mejFtEY5faU",
+    CNN : "JHk1uAvc4Vw",
+    TNT : "3-zItZwHS0Y",
+    NBC : "H-DSfvYCKwY",
+
+}
+
 var makeID = function() {
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -89,6 +97,21 @@ window.onload = function () {
         };
         prevChannel = curChannel;
         socket.send(JSON.stringify(registration));
+
+        $('#video').empty();
+        $('#video').append("<div id=\"player\"></div>");
+        //$('#video').append("<iframe width=\"640\" height=\"390\"src=\"" + videos[curChannel]  + "\"></iframe>");
+
+        var player = new YT.Player('player', {
+            height: '390',
+            width: '640',
+            playerVars: { 'controls': 0 },
+            videoId: videos[curChannel],
+            events: {
+                'onReady': function(event) { event.target.playVideo(); }
+            }
+        });
+
     })
 
     $('#send').change(function() {

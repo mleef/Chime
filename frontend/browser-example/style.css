@@ -13,3 +13,9 @@ input[type="submit"] {
     border: 0;
     -webkit-appearance: none;
 }
+
+#app {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}
