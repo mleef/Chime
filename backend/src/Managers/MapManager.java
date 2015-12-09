@@ -68,8 +68,8 @@ public class MapManager {
      * @param socket Socket associated with television to remove.
      **/
     public void clearTelevision(SocketChannel socket) {
-        logger.info(String.format("Removing %s.", socket.toString()));
         if(socketMap.containsKey(socket)) {
+            logger.info(String.format("Removing %s.", socket.toString()));
             televisionMap.remove(socketMap.get(socket));
             socketMap.remove(socket);
         }

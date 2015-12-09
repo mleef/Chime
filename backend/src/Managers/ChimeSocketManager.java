@@ -72,7 +72,6 @@ public class ChimeSocketManager implements Runnable {
         // To store socket channels and associated data
         ArrayList<SocketChannel> sockets = new ArrayList<>();
         ArrayList<String> messages = new ArrayList<>();
-
         Iterator iterator = selectedKeys.iterator();
         while (iterator.hasNext()) {
             // Store and remove key so we don't reprocess event

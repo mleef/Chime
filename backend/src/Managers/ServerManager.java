@@ -6,6 +6,9 @@ import Messaging.MessageSender;
 import TV.Channel;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+
+import java.util.Timer;
+
 import static spark.Spark.*;
 
 /**
@@ -59,9 +62,9 @@ public class ServerManager {
         new Thread(chimeRestManager).start();
 
         // Start intermittent statistics generation
-        // Timer timer = new Timer("Stats");
-        // logger.info("Starting Stats Manager...");
-        // timer.scheduleAtFixedRate(new StatsManager(channelMap, televisionMap), 1000, 10000);
+        Timer timer = new Timer("Cleanup");
+        logger.info("Starting Stats Manager...");
+        timer.scheduleAtFixedRate(new CleanupManager(channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap), 0, 30000);
 
     }
 
