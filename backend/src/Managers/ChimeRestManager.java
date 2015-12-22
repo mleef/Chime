@@ -45,9 +45,11 @@ public class ChimeRestManager implements Runnable {
         this.logger = LoggerFactory.getLogger(ChimeRestManager.class);
     }
 
+    /**
+     * Listen for various HTTP requests.
+     **/
     @Override
     public void run() {
-
         // Allow cross origin requests
         options("/*", (request,response)->{
             String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
@@ -62,6 +64,7 @@ public class ChimeRestManager implements Runnable {
             return "OK";
         });
 
+        // Add headers to response
         before((request,response)->{
             response.header("Access-Control-Allow-Origin", "*");
         });

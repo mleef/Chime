@@ -13,12 +13,6 @@ import java.util.Timer;
  * Chime edge nodes maintaining socket connections.
  */
 public class ChimeSlaveManager {
-    private MapManager mapper;
-    private TelevisionMap televisionMap;
-    private TelevisionWSMap televisionWSMap;
-    private SocketMap socketMap;
-    private WebSocketMap webSocketMap;
-    private ChannelMap channelMap;
 
     public static void main(String[] args) {
         // Create new data structures

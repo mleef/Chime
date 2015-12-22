@@ -14,29 +14,18 @@ import static spark.Spark.*;
  */
 public class SlaveRestManager implements Runnable {
     private SocketMessageSender sender;
-    private MapManager mapper;
-    private ChannelMap channelMap;
-    private SocketMap socketMap;
     private TelevisionMap televisionMap;
     private TelevisionWSMap televisionWSMap;
-    private WebSocketMap webSocketMap;
     private Gson gson;
     private Logger logger;
 
     /**
      * Constructor for the SlaveRestManager class.
-     * @param channelMap Mapping of channels to watching televisions.
-     * @param socketMap Mapping of sockets to associated televisions.
      * @param televisionMap Mapping of televisions to associated sockets.
      * @param televisionWSMap Mapping of televisions to associated web sockets.
-     * @param webSocketMap Mapping of web sockets to associated televisions.
      **/
-    public SlaveRestManager(SocketMessageSender sender, MapManager mapper, ChannelMap channelMap, SocketMap socketMap, WebSocketMap webSocketMap, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap) {
+    public SlaveRestManager(SocketMessageSender sender,TelevisionMap televisionMap, TelevisionWSMap televisionWSMap) {
         this.sender = sender;
-        this.mapper = mapper;
-        this.channelMap = channelMap;
-        this.socketMap = socketMap;
-        this.webSocketMap = webSocketMap;
         this.televisionMap = televisionMap;
         this.televisionWSMap = televisionWSMap;
         gson = new Gson();
@@ -44,6 +33,9 @@ public class SlaveRestManager implements Runnable {
     }
 
     @Override
+    /**
+     * Listen for various HTTP requests.
+     **/
     public void run() {
         // Allow cross origin requests
         options("/*", (request,response)->{
@@ -59,6 +51,7 @@ public class SlaveRestManager implements Runnable {
             return "OK";
         });
 
+        // Add headers to response
         before((request,response)->{
             response.header("Access-Control-Allow-Origin", "*");
         });

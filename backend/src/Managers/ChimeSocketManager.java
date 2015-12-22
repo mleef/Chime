@@ -41,6 +41,7 @@ public class ChimeSocketManager implements Runnable {
     /**
      * Listen for connections from clients.
      **/
+    @Override
     public void run() {
         try {
             // Initialize and configure server socket channel
