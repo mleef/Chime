@@ -13,7 +13,7 @@ import java.util.Timer;
  * Created by marcleef on 12/20/15.
  * Chime edge nodes maintaining socket connections.
  */
-public class ChimeSlaveManager {
+public class ChimeWorkerManager {
 
     public static void main(String[] args) {
         // Create new data structures
@@ -32,7 +32,7 @@ public class ChimeSlaveManager {
 
         // Set port and logger
         int portNumber = 4444;
-        Logger logger = LoggerFactory.getLogger(ChimeSlaveManager.class);
+        Logger logger = LoggerFactory.getLogger(ChimeWorkerManager.class);
 
         logger.info("Initializing new Chime slave...");
 

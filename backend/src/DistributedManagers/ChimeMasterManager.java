@@ -31,7 +31,7 @@ public class ChimeMasterManager {
 
         // Set port and logger
         int portNumber = 4444;
-        Logger logger = LoggerFactory.getLogger(ChimeSlaveManager.class);
+        Logger logger = LoggerFactory.getLogger(ChimeWorkerManager.class);
 
         logger.info("Initializing new Chime master...");
 

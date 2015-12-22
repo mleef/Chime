@@ -23,7 +23,7 @@ public class ChimeWebSocketManager extends WebSocketServer implements Runnable {
     private Logger logger;
     private SocketMessageSender sender;
     private MapManager mapper;
-    private boolean slave;
+    private boolean isWorker;
 
     /**
      * Constructor for the ChimeWebSocketManager class.
@@ -31,13 +31,13 @@ public class ChimeWebSocketManager extends WebSocketServer implements Runnable {
      * @param sender To handle message sending.
      * @param mapper To handle map updates.
      **/
-    public ChimeWebSocketManager(int port, SocketMessageSender sender, MapManager mapper, boolean slave) throws UnknownHostException {
+    public ChimeWebSocketManager(int port, SocketMessageSender sender, MapManager mapper, boolean isWorker) throws UnknownHostException {
         super( new InetSocketAddress( port ) );
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(ChimeWebSocketManager.class);
         this.sender = sender;
         this.mapper = mapper;
-        this.slave = slave;
+        this.isWorker = isWorker;
     }
 
     /**
