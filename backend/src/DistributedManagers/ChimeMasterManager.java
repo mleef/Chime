@@ -1,12 +1,9 @@
 package DistributedManagers;
 
 import DataStructures.*;
-import Managers.ChimeSocketManager;
-import Managers.ChimeWebSocketManager;
 import Managers.CleanupManager;
 import Managers.MapManager;
 import Networking.HttpMessageSender;
-import Networking.SocketMessageSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

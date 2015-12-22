@@ -116,7 +116,7 @@ public class ChimeRestManager implements Runnable {
 
         // Process registration messages from client
         post("/television/register", (request, response) -> {
-            logger.info(String.format("POST REGISTRATION - %s: (%s -> %s)", request.params(":television"), request.params(":previousChannel"), request.params(":newChannel")));
+            logger.info("POST REGISTRATION");
             try {
                 RegistrationMessage registrationMessage = gson.fromJson(request.body(), RegistrationMessage.class);
                 mapper.addTelevisionToChannel(registrationMessage.getTelevision(), registrationMessage.getPreviousChannel(), registrationMessage.getNewChannel());

@@ -28,7 +28,7 @@ public class SlaveRestManager implements Runnable {
         this.sender = sender;
         this.televisionMap = televisionMap;
         this.televisionWSMap = televisionWSMap;
-        gson = new Gson();
+        this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(SlaveRestManager.class);
     }
 
@@ -57,7 +57,7 @@ public class SlaveRestManager implements Runnable {
         });
 
         // Get list of all televisions managed by this node
-        get("/televisions", (request, response) -> {
+        get("/television", (request, response) -> {
             logger.info("GET TELEVISIONS - ALL");
             try {
                 return gson.toJson(televisionMap.getTelevisions().addAll(televisionWSMap.getTelevisions()));
@@ -68,7 +68,7 @@ public class SlaveRestManager implements Runnable {
         });
 
         // Get list of all socket connected televisions managed by this node
-        get("/televisions/sockets", (request, response) -> {
+        get("/television/sockets", (request, response) -> {
             logger.info("GET TELEVISIONS - SOCKETS");
             try {
                 return gson.toJson(televisionMap.getTelevisions());
@@ -79,7 +79,7 @@ public class SlaveRestManager implements Runnable {
         });
 
         // Get list of all web socket connected televisions managed by this node
-        get("/televisions/websockets", (request, response) -> {
+        get("/television/websockets", (request, response) -> {
             logger.info("GET TELEVISIONS - WEB SOCKETS");
             try {
                 return gson.toJson(televisionWSMap.getTelevisions());
@@ -90,7 +90,7 @@ public class SlaveRestManager implements Runnable {
         });
 
         // Send Chimes to televisions.
-        post("/televisions/chime", (request, response) -> {
+        post("/television/chime", (request, response) -> {
             logger.info("POST CHIME");
             try {
                 TelevisionsMessage televisionsMessage = gson.fromJson(request.body(), TelevisionsMessage.class);
