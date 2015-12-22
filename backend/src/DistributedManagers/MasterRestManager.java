@@ -1,19 +1,15 @@
 package DistributedManagers;
 import DataStructures.ChannelMap;
-import DataStructures.SlaveMap;
 import Managers.MapManager;
 import Networking.HttpMessageSender;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-import static spark.Spark.*;
 /**
  * Created by marcleef on 12/22/15.
  * Manage HTTP requests that coordinate behaviors of ChimeSlave(s).
  */
 public class MasterRestManager implements Runnable {
     private ChannelMap channelMap;
-    private SlaveMap slaveMap;
+    private ChannelMap slaveMap;
     private MapManager mapper;
     private HttpMessageSender sender;
 
@@ -22,7 +18,7 @@ public class MasterRestManager implements Runnable {
      * @param channelMap Mapping of channels to watching televisions.
      * @param mapper To manage updates to the various maps.
      **/
-    public MasterRestManager(ChannelMap channelMap, SlaveMap slaveMap, MapManager mapper, HttpMessageSender sender) {
+    public MasterRestManager(ChannelMap channelMap, ChannelMap slaveMap, MapManager mapper, HttpMessageSender sender) {
         this.channelMap = channelMap;
         this.slaveMap = slaveMap;
         this.mapper = mapper;

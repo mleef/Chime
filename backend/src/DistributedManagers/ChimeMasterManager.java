@@ -20,7 +20,7 @@ public class ChimeMasterManager {
     public static void main(String[] args) {
         // Create new data structures
         ChannelMap channelMap = new ChannelMap();
-        SlaveMap slaveMap = new SlaveMap();
+        ChannelMap slaveMap = new ChannelMap();
         TelevisionMap televisionMap = new TelevisionMap();
         TelevisionWSMap televisionWSMap = new TelevisionWSMap();
         SocketMap socketMap = new SocketMap();
