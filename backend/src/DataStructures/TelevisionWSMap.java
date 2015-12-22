@@ -5,6 +5,7 @@ import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -34,6 +35,14 @@ public class TelevisionWSMap extends ConcurrentHashMap<Television, WebSocket> {
      **/
     public int getViewers() {
         return this.keySet().size();
+    }
+
+    /**
+     * Gets list of all televisions.
+     * @return All televisions in map.
+     **/
+    public ArrayList<Television> getTelevisions() {
+        return new ArrayList<>(this.keySet());
     }
 
 

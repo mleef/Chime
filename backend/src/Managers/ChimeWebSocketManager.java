@@ -5,7 +5,7 @@ import java.net.UnknownHostException;
 
 import Messaging.ChimeMessage;
 import Messaging.ClientMessage;
-import Messaging.MessageSender;
+import Networking.SocketMessageSender;
 import Messaging.RegistrationMessage;
 import com.google.gson.Gson;
 import org.java_websocket.WebSocket;
@@ -21,8 +21,9 @@ import org.slf4j.LoggerFactory;
 public class ChimeWebSocketManager extends WebSocketServer implements Runnable {
     private Gson gson;
     private Logger logger;
-    private MessageSender sender;
+    private SocketMessageSender sender;
     private MapManager mapper;
+    private boolean slave;
 
     /**
      * Constructor for the ChimeWebSocketManager class.
@@ -30,12 +31,13 @@ public class ChimeWebSocketManager extends WebSocketServer implements Runnable {
      * @param sender To handle message sending.
      * @param mapper To handle map updates.
      **/
-    public ChimeWebSocketManager(int port, MessageSender sender, MapManager mapper) throws UnknownHostException {
+    public ChimeWebSocketManager(int port, SocketMessageSender sender, MapManager mapper, boolean slave) throws UnknownHostException {
         super( new InetSocketAddress( port ) );
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(ChimeWebSocketManager.class);
         this.sender = sender;
         this.mapper = mapper;
+        this.slave = slave;
     }
 
     /**

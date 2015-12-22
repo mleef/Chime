@@ -1,11 +1,10 @@
 package Managers;
 
 import Handlers.ConnectionHandler;
-import Messaging.MessageSender;
+import Networking.SocketMessageSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -20,20 +19,23 @@ public class ChimeSocketManager implements Runnable {
     private ServerSocketChannel serverChannel;
     private int portNumber;
     private Logger logger;
-    private MessageSender sender;
+    private SocketMessageSender sender;
     private MapManager mapper;
+    private boolean slave;
 
     /**
      * Constructor for the ChimeSocketManager class.
      * @param  portNumber Port to listen on.
      * @param sender To handle messaging.
      * @param mapper To handle map updates.
+     * @param slave Determines behavior of manager (edge node vs. monolith)
      **/
-    public ChimeSocketManager(int portNumber, MessageSender sender, MapManager mapper) {
+    public ChimeSocketManager(int portNumber, SocketMessageSender sender, MapManager mapper, boolean slave) {
         this.portNumber = portNumber;
         this.logger = LoggerFactory.getLogger(ChimeSocketManager.class);
         this.sender = sender;
         this.mapper = mapper;
+        this.slave = slave;
     }
 
     /**

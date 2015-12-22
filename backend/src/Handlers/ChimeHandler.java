@@ -3,7 +3,7 @@ package Handlers;
 import java.util.ArrayList;
 
 import Messaging.ChimeMessage;
-import Messaging.MessageSender;
+import Networking.SocketMessageSender;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
@@ -14,14 +14,14 @@ import org.slf4j.Logger;
 public class ChimeHandler extends Handler {
     private ArrayList<ChimeMessage> chimeMessages;
     private Logger logger;
-    private MessageSender sender;
+    private SocketMessageSender sender;
 
 
     /**
      * Constructor for ChimeHandler class.
      * @param chimeMessages Messages being sent.
      **/
-    public ChimeHandler(ArrayList<ChimeMessage> chimeMessages, MessageSender sender) {
+    public ChimeHandler(ArrayList<ChimeMessage> chimeMessages, SocketMessageSender sender) {
         this.chimeMessages = chimeMessages;
         this.logger = LoggerFactory.getLogger(ChimeHandler.class);
         this.sender = sender;

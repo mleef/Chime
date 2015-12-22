@@ -8,6 +8,7 @@ import DataStructures.SocketMap;
 import DataStructures.TelevisionMap;
 import Managers.MapManager;
 import Messaging.*;
+import Networking.SocketMessageSender;
 import com.google.gson.*;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -24,7 +25,7 @@ public class ConnectionHandler extends Handler {
     private SocketMap socketMap;
     private Gson gson;
     private Logger logger;
-    private MessageSender sender;
+    private SocketMessageSender sender;
     private MapManager mapper;
     private ArrayList<SocketChannel> registrationClients;
     private ArrayList<RegistrationMessage> registrationMessages;
@@ -36,7 +37,7 @@ public class ConnectionHandler extends Handler {
      * Constructor for ChimeHandler class.
      * @param clients Socket of television that sent message.
      **/
-    public ConnectionHandler(ArrayList<SocketChannel> clients, ArrayList<String> messages, MessageSender sender, MapManager mapper) {
+    public ConnectionHandler(ArrayList<SocketChannel> clients, ArrayList<String> messages, SocketMessageSender sender, MapManager mapper) {
         this.clients = clients;
         this.messages = messages;
         this.gson = new Gson();

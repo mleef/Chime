@@ -1,16 +1,12 @@
 package Managers;
 import DataStructures.*;
 import Messaging.*;
+import Networking.SocketMessageSender;
 import TV.Channel;
 import TV.Television;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import static spark.Spark.*;
 
@@ -19,7 +15,7 @@ import static spark.Spark.*;
  * Exposes map functions via RESTful API
  */
 public class ChimeRestManager implements Runnable {
-    private MessageSender sender;
+    private SocketMessageSender sender;
     private MapManager mapper;
     private ChannelMap channelMap;
     private SocketMap socketMap;
@@ -30,14 +26,14 @@ public class ChimeRestManager implements Runnable {
     private Logger logger;
 
     /**
-     * Constructor for the MapManager class.
+     * Constructor for the ChimeRestManager class.
      * @param channelMap Mapping of channels to watching televisions.
      * @param socketMap Mapping of sockets to associated televisions.
      * @param televisionMap Mapping of televisions to associated sockets.
      * @param televisionWSMap Mapping of televisions to associated web sockets.
      * @param webSocketMap Mapping of web sockets to associated televisions.
      **/
-    public ChimeRestManager(MessageSender sender, MapManager mapper, ChannelMap channelMap, SocketMap socketMap, WebSocketMap webSocketMap, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap) {
+    public ChimeRestManager(SocketMessageSender sender, MapManager mapper, ChannelMap channelMap, SocketMap socketMap, WebSocketMap webSocketMap, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap) {
         this.sender = sender;
         this.mapper = mapper;
         this.channelMap = channelMap;
@@ -49,6 +45,7 @@ public class ChimeRestManager implements Runnable {
         this.logger = LoggerFactory.getLogger(ChimeRestManager.class);
     }
 
+    @Override
     public void run() {
 
         // Allow cross origin requests
@@ -150,10 +147,6 @@ public class ChimeRestManager implements Runnable {
                 return gson.toJson(new ErrorMessage(e.toString()));
             }
         });
-
-
-
-
 
     }
 }

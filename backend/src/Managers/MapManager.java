@@ -151,4 +151,5 @@ public class MapManager {
         addTelevisionWS(registrationMessage.getTelevision(), client);
         addTelevisionToChannel(registrationMessage.getTelevision(), registrationMessage.getPreviousChannel(), registrationMessage.getNewChannel());
     }
+
 }
