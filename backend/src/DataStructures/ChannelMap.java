@@ -68,7 +68,6 @@ public class ChannelMap extends ConcurrentHashMap<Channel, Set<Television>> {
         }
 
         return this.get(channel);
-
     }
 
     /**

@@ -2,6 +2,7 @@ package DistributedManagers;
 
 import DataStructures.*;
 import Managers.*;
+import Networking.HttpMessageSender;
 import Networking.SocketMessageSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +28,15 @@ public class ChimeSlaveManager {
 
         // For sending messages to clients
         SocketMessageSender sender = new SocketMessageSender(mapper, channelMap, televisionMap, televisionWSMap);
+        HttpMessageSender httpSender = new HttpMessageSender();
 
         // Set port and logger
         int portNumber = 4444;
         Logger logger = LoggerFactory.getLogger(ChimeSlaveManager.class);
 
         logger.info("Initializing new Chime slave...");
+
+        // TODO: Register with master to validate before continuing
 
 
         // Initialize socket based chime manager and begin execution
@@ -51,7 +55,7 @@ public class ChimeSlaveManager {
         }
 
         // Initialize RESTful API interface to handle HTTP requests
-        SlaveRestManager slaveRestManager = new SlaveRestManager(sender, mapper, channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap);
+        SlaveRestManager slaveRestManager = new SlaveRestManager(sender, televisionMap, televisionWSMap);
         logger.info(String.format("Starting Chime REST Manager on port %d...", 4567));
         new Thread(slaveRestManager).start();
 

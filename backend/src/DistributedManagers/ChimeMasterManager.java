@@ -20,6 +20,7 @@ public class ChimeMasterManager {
     public static void main(String[] args) {
         // Create new data structures
         ChannelMap channelMap = new ChannelMap();
+        SlaveMap slaveMap = new SlaveMap();
         TelevisionMap televisionMap = new TelevisionMap();
         TelevisionWSMap televisionWSMap = new TelevisionWSMap();
         SocketMap socketMap = new SocketMap();
@@ -38,7 +39,7 @@ public class ChimeMasterManager {
         logger.info("Initializing new Chime master...");
 
         // Initialize RESTful API interface to handle HTTP requests
-        MasterRestManager masterRestManager = new MasterRestManager(channelMap, mapper, sender);
+        MasterRestManager masterRestManager = new MasterRestManager(channelMap, slaveMap, mapper, sender);
         logger.info(String.format("Starting Chime REST Manager on port %d...", 4567));
         new Thread(masterRestManager).start();
 

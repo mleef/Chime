@@ -1,5 +1,6 @@
 package DistributedManagers;
 import DataStructures.ChannelMap;
+import DataStructures.SlaveMap;
 import Managers.MapManager;
 import Networking.HttpMessageSender;
 
@@ -12,7 +13,7 @@ import static spark.Spark.*;
  */
 public class MasterRestManager implements Runnable {
     private ChannelMap channelMap;
-    private ConcurrentHashMap<String, String> slaveMap;
+    private SlaveMap slaveMap;
     private MapManager mapper;
     private HttpMessageSender sender;
 
@@ -21,9 +22,9 @@ public class MasterRestManager implements Runnable {
      * @param channelMap Mapping of channels to watching televisions.
      * @param mapper To manage updates to the various maps.
      **/
-    public MasterRestManager(ChannelMap channelMap, MapManager mapper, HttpMessageSender sender) {
+    public MasterRestManager(ChannelMap channelMap, SlaveMap slaveMap, MapManager mapper, HttpMessageSender sender) {
         this.channelMap = channelMap;
-        this.slaveMap = new ConcurrentHashMap<>();
+        this.slaveMap = slaveMap;
         this.mapper = mapper;
         this.sender = sender;
     }
