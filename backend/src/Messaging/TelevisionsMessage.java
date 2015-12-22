@@ -3,16 +3,17 @@ package Messaging;
 import TV.Television;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Created by marcleef on 11/9/15.
  * To handle success messages relayed to the client.
  */
 public class TelevisionsMessage extends Message {
-    private ArrayList<Television> televisions;
+    private Set<Television> televisions;
     private ChimeMessage chimeMessage;
 
-    public TelevisionsMessage(ArrayList<Television> televisions, ChimeMessage chimeMessage) {
+    public TelevisionsMessage(Set<Television> televisions, ChimeMessage chimeMessage) {
         this.televisions = televisions;
         this.chimeMessage = chimeMessage;
     }
@@ -29,7 +30,7 @@ public class TelevisionsMessage extends Message {
      * Gets list of televisions.
      * @return List of contained television objects.
      **/
-    public ArrayList<Television> getTelevisions() {
+    public Set<Television> getTelevisions() {
         return televisions;
     }
 

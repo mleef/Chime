@@ -59,20 +59,17 @@ public class SocketMessageSender {
             return;
         }
 
-        // Cast Set to ArrayList
-        ArrayList<Television> televisions = new ArrayList<Television>();
-        televisions.addAll(watchingTelevisions);
 
         logger.info(String.format("Broadcasting %s to %d clients...", chimeMessage.getMessage(), watchingTelevisions.size()));
 
-        sendChimes(televisions, chimeMessage);
+        sendChimes(watchingTelevisions, chimeMessage);
     }
 
     /**
      * Broadcast messages to clients
      * @param televisions Televisions to deliver new Chime Message to.
      **/
-    public void broadcast(ArrayList<Television> televisions, ChimeMessage chimeMessage) {
+    public void broadcast(Set<Television> televisions, ChimeMessage chimeMessage) {
         logger.info(String.format("Broadcasting %s to %d clients...", chimeMessage.getMessage(), televisions.size()));
         sendChimes(televisions, chimeMessage);
     }
@@ -116,7 +113,7 @@ public class SocketMessageSender {
      * @param televisions List of televisions to send Chimes to.
      * @param chimeMessage Message to relay to client.
      **/
-    public void sendChimes(ArrayList<Television> televisions, ChimeMessage chimeMessage) {
+    public void sendChimes(Set<Television> televisions, ChimeMessage chimeMessage) {
         boolean exists = false;
         ArrayList<Television> televisionsToRemove = new ArrayList<>();
         Channel channel = chimeMessage.getChannel();

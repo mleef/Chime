@@ -3,11 +3,14 @@ package Networking;
 import DataStructures.ChannelMap;
 import Managers.MapManager;
 import Messaging.ChimeMessage;
+import Messaging.Message;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * Created by marcleef on 12/22/15.
@@ -20,14 +23,12 @@ public class HttpMessageSender {
     private Gson gson;
     private Logger logger;
 
-    public HttpMessageSender(ChannelMap channelMap, ChannelMap slaveMap, MapManager mapper) {
-        this.channelMap = channelMap;
-        this.slaveMap = slaveMap;
+    public HttpMessageSender() {
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(HttpMessageSender.class);
-        this.mapper = mapper;
     }
-    public void broadcast(ChimeMessage chimeMessage) {
+
+    public void postMessage(String dest, Message message) {
 
     }
 }

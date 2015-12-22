@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static spark.Spark.*;
 import static spark.Spark.delete;
@@ -27,6 +29,7 @@ public class MasterRestManager implements Runnable {
     private HttpMessageSender sender;
     private Logger logger;
     private Gson gson;
+    private final int SOCKETS_PER_SLAVE = 1000;
 
     /**
      * Constructor for the MasterRestManager class.
@@ -66,7 +69,6 @@ public class MasterRestManager implements Runnable {
             response.header("Access-Control-Allow-Origin", "*");
         });
 
-
         // Process new slave registrations
         post("/slave/register", (request, response) -> {
             logger.info("POST SLAVE REGISTRATION");
@@ -83,7 +85,7 @@ public class MasterRestManager implements Runnable {
         post("/television/chime", (request, response) -> {
             logger.info("POST CHIME");
             try {
-                sender.broadcast(gson.fromJson(request.body(), ChimeMessage.class));
+                sendChimes(gson.fromJson(request.body(), ChimeMessage.class));
                 return gson.toJson(new SuccessMessage("Chimes sent"));
             } catch(Exception e) {
                 logger.error(e.toString());
@@ -95,8 +97,20 @@ public class MasterRestManager implements Runnable {
         post("/television/register", (request, response) -> {
             logger.info("POST REGISTRATION");
             try {
+                SuccessMessage successMessage;
                 RegistrationMessage registrationMessage = gson.fromJson(request.body(), RegistrationMessage.class);
                 mapper.addTelevisionToChannel(registrationMessage.getTelevision(), registrationMessage.getPreviousChannel(), registrationMessage.getNewChannel());
+                // Assign new slave to client if first registration
+                if(registrationMessage.getPreviousChannel() == null) {
+                    successMessage = new SuccessMessage(getNextSlave());
+                    // If there are available slaves
+                    if(successMessage != null) {
+                        slaveMap.putTV(registrationMessage.getNewChannel(), registrationMessage.getTelevision());
+                        return gson.toJson(new SuccessMessage(getNextSlave()));
+                    } else {
+                        return gson.toJson(new ErrorMessage("System at capacity"));
+                    }
+                }
                 return gson.toJson(new SuccessMessage("Registration confirmed"));
             } catch(Exception e) {
                 logger.error(e.toString());
@@ -117,5 +131,40 @@ public class MasterRestManager implements Runnable {
         });
 
     }
+
+
+    /**
+     * Determine which slaves contain the relevant televisions and forward message.
+     * @param chimeMessage Message to send to clients.
+     **/
+    private void sendChimes(ChimeMessage chimeMessage) {
+        // Get currently watching televisions
+        Set<Television> watchingTelevisions = channelMap.get(chimeMessage.getChannel());
+
+        for(Channel channel : slaveMap.keySet()) {
+            // Union slave TVs with watching TVs
+            Set<Television> televisions = slaveMap.get(channel);
+            televisions.retainAll(watchingTelevisions);
+
+            // Relay message to slave
+            sender.postMessage(channel.getId(), new TelevisionsMessage(televisions, chimeMessage));
+        }
+    }
+
+    /**
+     * Hackey "load balancing", direct clients to machines based on number of sockets
+     * @return URL of client to connect with.
+     **/
+    private String getNextSlave() {
+        for(Channel channel : slaveMap.keySet()) {
+            if(slaveMap.getTotalViewers() < SOCKETS_PER_SLAVE) {
+                return channel.getId();
+            }
+        }
+        // All slaves at capacity, can't connect
+        return null;
+    }
+
+
 
 }
