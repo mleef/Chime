@@ -60,14 +60,7 @@ window.onload = function () {
         //socket.send(JSON.stringify(chime2));
     }
 
-    socket.onmessage = function (message) {
-        console.log("response received");
-        messageObj = JSON.parse(message.data);
-        console.log(messageObj);
-        //$("marquee").append(' ' + messageObj.message);
-        $("#ticker").append("<marquee id=\"ticker\" behavior=\"scroll\" direction=\"left\" height=\"20px\" loop=\"1\">"
-        + messageObj.message + "</marquee>");
-    }
+
 
 
     var updateChannels = function() {
