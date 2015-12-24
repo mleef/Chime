@@ -16,10 +16,6 @@ Chime is a high-performance chat server designed specifically to be used in conj
 ## Backend Usage
 
 ### Default Ports
-
-Default ports for the various services:
---------
-
 1. **Socket Connections:**
 	4444
 2. **Web Socket Connections:**
@@ -91,24 +87,13 @@ var chime = {
 socket.send(JSON.stringify(chime));
 ```
 
-To connect to a Chime Worker instance first contact the master to be assigned a worker:
+To connect to a Chime Worker instance first send a POST request to the master to be assigned a worker:
 ```
-// Just like a normal registration except the previous channel is null
-var workerRgistration = {
-    registrationMessage: {
-        previousChannel : null,
-        newChannel : {id : "1"},
-        television : {id : "marcs-tv"}
-    }
-};
-// Send to server
-socket.send(JSON.stringify(workerRegistration));
+[Chime Master URL]/worker/assignment
 ```
 
 The response should be a success object that contains a worker URL to connect to:
 ```
-{
     success : "[Worker URL]"
-}
 ```
 

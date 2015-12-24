@@ -70,12 +70,29 @@ public class MasterRestManager implements Runnable {
             response.header("Access-Control-Allow-Origin", "*");
         });
 
-        // Process new slave registrations
+        // Process new worker registrations
         post(Endpoints.WORKER_REGISTRATION, (request, response) -> {
             logger.info(String.format("POST SLAVE REGISTRATION - %s", request.url()));
             try {
                 workerMap.addChannel(new Channel(request.ip()));
                 return gson.toJson(new SuccessMessage("Slave Registration confirmed"));
+            } catch(Exception e) {
+                logger.error(e.toString());
+                return gson.toJson(new ErrorMessage(e.toString()));
+            }
+        });
+
+        // Assign new workers to clients
+        post(Endpoints.WORKER_ASSIGNMENT, (request, response) -> {
+            logger.info(String.format("POST SLAVE REGISTRATION - %s", request.url()));
+            try {
+                SuccessMessage successMessage = new SuccessMessage(getNextWorker());
+                // If there are available workers
+                if(successMessage != null) {
+                    return gson.toJson(successMessage);
+                } else {
+                    return gson.toJson(new ErrorMessage("System at capacity"));
+                }
             } catch(Exception e) {
                 logger.error(e.toString());
                 return gson.toJson(new ErrorMessage(e.toString()));
@@ -101,17 +118,6 @@ public class MasterRestManager implements Runnable {
                 SuccessMessage successMessage;
                 RegistrationMessage registrationMessage = gson.fromJson(request.body(), RegistrationMessage.class);
                 mapper.addTelevisionToChannel(registrationMessage.getTelevision(), registrationMessage.getPreviousChannel(), registrationMessage.getNewChannel());
-                // Assign new worker to client if first registration
-                if(registrationMessage.getPreviousChannel() == null) {
-                    successMessage = new SuccessMessage(getNextWorker());
-                    // If there are available slaves
-                    if(successMessage != null) {
-                        workerMap.putTV(registrationMessage.getNewChannel(), registrationMessage.getTelevision());
-                        return gson.toJson(successMessage);
-                    } else {
-                        return gson.toJson(new ErrorMessage("System at capacity"));
-                    }
-                }
                 return gson.toJson(new SuccessMessage("Registration confirmed"));
             } catch(Exception e) {
                 logger.error(e.toString());
