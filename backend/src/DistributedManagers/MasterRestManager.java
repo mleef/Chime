@@ -24,21 +24,22 @@ import static spark.Spark.post;
  */
 public class MasterRestManager implements Runnable {
     private ChannelMap channelMap;
-    private ChannelMap slaveMap;
+    private ChannelMap workerMap;
     private MapManager mapper;
     private HttpMessageSender sender;
     private Logger logger;
     private Gson gson;
-    private final int SOCKETS_PER_SLAVE = 1000;
+    private final int SOCKETS_PER_WORKER = 1000;
 
     /**
      * Constructor for the MasterRestManager class.
      * @param channelMap Mapping of channels to watching televisions.
      * @param mapper To manage updates to the various maps.
      **/
-    public MasterRestManager(ChannelMap channelMap, ChannelMap slaveMap, MapManager mapper, HttpMessageSender sender) {
+    public MasterRestManager(int portNumber, ChannelMap channelMap, ChannelMap workerMap, MapManager mapper, HttpMessageSender sender) {
+        port(portNumber);
         this.channelMap = channelMap;
-        this.slaveMap = slaveMap;
+        this.workerMap = workerMap;
         this.mapper = mapper;
         this.sender = sender;
         this.gson = new Gson();
@@ -70,10 +71,10 @@ public class MasterRestManager implements Runnable {
         });
 
         // Process new slave registrations
-        post("/slave/register", (request, response) -> {
-            logger.info("POST SLAVE REGISTRATION");
+        post(Endpoints.WORKER_REGISTRATION, (request, response) -> {
+            logger.info(String.format("POST SLAVE REGISTRATION - %s", request.url()));
             try {
-                slaveMap.addChannel(new Channel(request.url()));
+                workerMap.addChannel(new Channel(request.ip()));
                 return gson.toJson(new SuccessMessage("Slave Registration confirmed"));
             } catch(Exception e) {
                 logger.error(e.toString());
@@ -82,7 +83,7 @@ public class MasterRestManager implements Runnable {
         });
 
         // Send Chimes
-        post("/television/chime", (request, response) -> {
+        post(Endpoints.CHIME, (request, response) -> {
             logger.info("POST CHIME");
             try {
                 sendChimes(gson.fromJson(request.body(), ChimeMessage.class));
@@ -94,19 +95,19 @@ public class MasterRestManager implements Runnable {
         });
 
         // Process new television registrations
-        post("/television/register", (request, response) -> {
+        post(Endpoints.TV_REGISTRATION, (request, response) -> {
             logger.info("POST REGISTRATION");
             try {
                 SuccessMessage successMessage;
                 RegistrationMessage registrationMessage = gson.fromJson(request.body(), RegistrationMessage.class);
                 mapper.addTelevisionToChannel(registrationMessage.getTelevision(), registrationMessage.getPreviousChannel(), registrationMessage.getNewChannel());
-                // Assign new slave to client if first registration
+                // Assign new worker to client if first registration
                 if(registrationMessage.getPreviousChannel() == null) {
-                    successMessage = new SuccessMessage(getNextSlave());
+                    successMessage = new SuccessMessage(getNextWorker());
                     // If there are available slaves
                     if(successMessage != null) {
-                        slaveMap.putTV(registrationMessage.getNewChannel(), registrationMessage.getTelevision());
-                        return gson.toJson(new SuccessMessage(getNextSlave()));
+                        workerMap.putTV(registrationMessage.getNewChannel(), registrationMessage.getTelevision());
+                        return gson.toJson(successMessage);
                     } else {
                         return gson.toJson(new ErrorMessage("System at capacity"));
                     }
@@ -134,20 +135,24 @@ public class MasterRestManager implements Runnable {
 
 
     /**
-     * Determine which slaves contain the relevant televisions and forward message.
+     * Determine which workers contain the relevant televisions and forward message.
      * @param chimeMessage Message to send to clients.
      **/
     private void sendChimes(ChimeMessage chimeMessage) {
         // Get currently watching televisions
         Set<Television> watchingTelevisions = channelMap.get(chimeMessage.getChannel());
 
-        for(Channel channel : slaveMap.keySet()) {
+        for(Channel channel : workerMap.keySet()) {
             // Union slave TVs with watching TVs
-            Set<Television> televisions = slaveMap.get(channel);
+            Set<Television> televisions = workerMap.get(channel);
             televisions.retainAll(watchingTelevisions);
 
-            // Relay message to slave
-            sender.postMessage(channel.getId(), new TelevisionsMessage(televisions, chimeMessage));
+            try {
+                // Relay message to worker
+                sender.post(channel.getId(), new TelevisionsMessage(televisions, chimeMessage));
+            } catch (Exception e) {
+                logger.error(e.toString());
+            }
         }
     }
 
@@ -155,9 +160,9 @@ public class MasterRestManager implements Runnable {
      * Hackey "load balancing", direct clients to machines based on number of sockets
      * @return URL of client to connect with.
      **/
-    private String getNextSlave() {
-        for(Channel channel : slaveMap.keySet()) {
-            if(slaveMap.getTotalViewers() < SOCKETS_PER_SLAVE) {
+    private String getNextWorker() {
+        for(Channel channel : workerMap.keySet()) {
+            if(workerMap.getTotalViewers() < SOCKETS_PER_WORKER) {
                 return channel.getId();
             }
         }

@@ -17,7 +17,7 @@ public class ChimeMasterManager {
     public static void main(String[] args) {
         // Create new data structures
         ChannelMap channelMap = new ChannelMap();
-        ChannelMap slaveMap = new ChannelMap();
+        ChannelMap workerMap = new ChannelMap();
         TelevisionMap televisionMap = new TelevisionMap();
         TelevisionWSMap televisionWSMap = new TelevisionWSMap();
         SocketMap socketMap = new SocketMap();
@@ -30,20 +30,15 @@ public class ChimeMasterManager {
         HttpMessageSender sender = new HttpMessageSender();
 
         // Set port and logger
-        int portNumber = 4444;
-        Logger logger = LoggerFactory.getLogger(ChimeWorkerManager.class);
+        int portNumber = args.length > 0 ? Integer.parseInt(args[0]) : 4500;
+        Logger logger = LoggerFactory.getLogger(ChimeMasterManager.class);
 
         logger.info("Initializing new Chime master...");
 
         // Initialize RESTful API interface to handle HTTP requests
-        MasterRestManager masterRestManager = new MasterRestManager(channelMap, slaveMap, mapper, sender);
-        logger.info(String.format("Starting Chime REST Manager on port %d...", 4567));
+        MasterRestManager masterRestManager = new MasterRestManager(portNumber, channelMap, workerMap, mapper, sender);
+        logger.info(String.format("Starting Chime Master port %d...", portNumber));
         new Thread(masterRestManager).start();
-
-        // Start intermittent cleanup processes
-        Timer timer = new Timer("Cleanup");
-        logger.info("Starting Cleanup Manager...");
-        timer.scheduleAtFixedRate(new CleanupManager(channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap), 0, 30000);
 
     }
 }

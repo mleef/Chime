@@ -21,21 +21,21 @@ public class ChimeSocketManager implements Runnable {
     private Logger logger;
     private SocketMessageSender sender;
     private MapManager mapper;
-    private boolean isWorker;
+    private String masterUrl;
 
     /**
      * Constructor for the ChimeSocketManager class.
      * @param  portNumber Port to listen on.
      * @param sender To handle messaging.
      * @param mapper To handle map updates.
-     * @param isWorker Determines behavior of manager (edge node vs. monolith)
+     * @param masterUrl Determines behavior of manager (worker node vs. monolith)
      **/
-    public ChimeSocketManager(int portNumber, SocketMessageSender sender, MapManager mapper, boolean isWorker) {
+    public ChimeSocketManager(int portNumber, SocketMessageSender sender, MapManager mapper, String masterUrl) {
         this.portNumber = portNumber;
         this.logger = LoggerFactory.getLogger(ChimeSocketManager.class);
         this.sender = sender;
         this.mapper = mapper;
-        this.isWorker = isWorker;
+        this.masterUrl = masterUrl;
     }
 
     /**

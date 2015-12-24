@@ -1,6 +1,5 @@
 package DistributedManagers;
 import DataStructures.*;
-import Managers.MapManager;
 import Messaging.*;
 import Networking.SocketMessageSender;
 import com.google.gson.Gson;
@@ -12,7 +11,7 @@ import static spark.Spark.*;
  * Created by marcleef on 12/22/15.
  * Manage HTTP requests to maintain consistency with master.
  */
-public class SlaveRestManager implements Runnable {
+public class WorkerRestManager implements Runnable {
     private SocketMessageSender sender;
     private TelevisionMap televisionMap;
     private TelevisionWSMap televisionWSMap;
@@ -24,12 +23,12 @@ public class SlaveRestManager implements Runnable {
      * @param televisionMap Mapping of televisions to associated sockets.
      * @param televisionWSMap Mapping of televisions to associated web sockets.
      **/
-    public SlaveRestManager(SocketMessageSender sender,TelevisionMap televisionMap, TelevisionWSMap televisionWSMap) {
+    public WorkerRestManager(SocketMessageSender sender, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap) {
         this.sender = sender;
         this.televisionMap = televisionMap;
         this.televisionWSMap = televisionWSMap;
         this.gson = new Gson();
-        this.logger = LoggerFactory.getLogger(SlaveRestManager.class);
+        this.logger = LoggerFactory.getLogger(WorkerRestManager.class);
     }
 
     @Override
@@ -57,7 +56,7 @@ public class SlaveRestManager implements Runnable {
         });
 
         // Get list of all televisions managed by this node
-        get("/television", (request, response) -> {
+        get(Endpoints.TELEVISIONS, (request, response) -> {
             logger.info("GET TELEVISIONS - ALL");
             try {
                 return gson.toJson(televisionMap.getTelevisions().addAll(televisionWSMap.getTelevisions()));
@@ -68,7 +67,7 @@ public class SlaveRestManager implements Runnable {
         });
 
         // Get list of all socket connected televisions managed by this node
-        get("/television/sockets", (request, response) -> {
+        get(Endpoints.SOCKETS, (request, response) -> {
             logger.info("GET TELEVISIONS - SOCKETS");
             try {
                 return gson.toJson(televisionMap.getTelevisions());
@@ -79,7 +78,7 @@ public class SlaveRestManager implements Runnable {
         });
 
         // Get list of all web socket connected televisions managed by this node
-        get("/television/websockets", (request, response) -> {
+        get(Endpoints.WEB_SOCKETS, (request, response) -> {
             logger.info("GET TELEVISIONS - WEB SOCKETS");
             try {
                 return gson.toJson(televisionWSMap.getTelevisions());
@@ -90,7 +89,7 @@ public class SlaveRestManager implements Runnable {
         });
 
         // Send Chimes to televisions.
-        post("/television/chime", (request, response) -> {
+        post(Endpoints.CHIME, (request, response) -> {
             logger.info("POST CHIME");
             try {
                 TelevisionsMessage televisionsMessage = gson.fromJson(request.body(), TelevisionsMessage.class);

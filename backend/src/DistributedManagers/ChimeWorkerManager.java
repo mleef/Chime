@@ -2,6 +2,8 @@ package DistributedManagers;
 
 import DataStructures.*;
 import Managers.*;
+import Messaging.Endpoints;
+import Messaging.RegistrationMessage;
 import Networking.HttpMessageSender;
 import Networking.SocketMessageSender;
 import org.slf4j.Logger;
@@ -16,6 +18,10 @@ import java.util.Timer;
 public class ChimeWorkerManager {
 
     public static void main(String[] args) {
+        // Master URL
+        String MASTER_URL = args.length > 0 ? args[0] : "0.0.0.0:4500";
+
+
         // Create new data structures
         ChannelMap channelMap = new ChannelMap();
         TelevisionMap televisionMap = new TelevisionMap();
@@ -36,17 +42,24 @@ public class ChimeWorkerManager {
 
         logger.info("Initializing new Chime slave...");
 
-        // TODO: Register with master to validate before continuing
-
+        // Attempt to register with master
+        try {
+            httpSender.post(Endpoints.WORKER_REGISTRATION, null);
+        } catch(Exception e) {
+            logger.error("Failed to register with master.");
+            logger.error(e.toString());
+            e.printStackTrace();
+            System.exit(0);
+        }
 
         // Initialize socket based chime manager and begin execution
-        ChimeSocketManager chimeSocketManager = new ChimeSocketManager(portNumber, sender, mapper, true);
+        ChimeSocketManager chimeSocketManager = new ChimeSocketManager(portNumber, sender, mapper, MASTER_URL);
         logger.info(String.format("Starting Chime Socket Manager on port %d...", portNumber));
         new Thread(chimeSocketManager).start();
 
         // Initialize web socket based chime manager and begin execution
         try {
-            ChimeWebSocketManager chimeWebSocketManager = new ChimeWebSocketManager(portNumber + 1, sender, mapper, true);
+            ChimeWebSocketManager chimeWebSocketManager = new ChimeWebSocketManager(portNumber + 1, sender, mapper, MASTER_URL);
             logger.info(String.format("Starting Chime WebSocket Manager on port %d...", portNumber + 1));
             chimeWebSocketManager.start();
         } catch(Exception e) {
@@ -55,9 +68,9 @@ public class ChimeWorkerManager {
         }
 
         // Initialize RESTful API interface to handle HTTP requests
-        SlaveRestManager slaveRestManager = new SlaveRestManager(sender, televisionMap, televisionWSMap);
+        WorkerRestManager workerRestManager = new WorkerRestManager(sender, televisionMap, televisionWSMap);
         logger.info(String.format("Starting Chime REST Manager on port %d...", 4567));
-        new Thread(slaveRestManager).start();
+        new Thread(workerRestManager).start();
 
         // Start intermittent cleanup processes
         Timer timer = new Timer("Cleanup");
