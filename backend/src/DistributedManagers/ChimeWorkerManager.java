@@ -21,7 +21,6 @@ public class ChimeWorkerManager {
         // Master URL
         String MASTER_URL = args.length > 0 ? args[0] : "0.0.0.0:4500";
 
-
         // Create new data structures
         ChannelMap channelMap = new ChannelMap();
         TelevisionMap televisionMap = new TelevisionMap();
