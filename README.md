@@ -94,6 +94,8 @@ To connect to a Chime Worker instance first send a POST request to the master to
 
 The response should be a success object that contains a worker URL to connect to:
 ```
+{
     success : "[Worker URL]"
+}
 ```
 
