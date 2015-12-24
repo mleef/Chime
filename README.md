@@ -10,8 +10,12 @@ modified: 2016 January 10
 Chime: Real Time Channel Based Messaging for Smart TVs
 
 ## Overview
-Chime is a high-performance chat server designed specifically to be used in conjunction with Smart TV applications. Chime can be deployed as either a monolithic instance or as a group of worker instances reporting to a master.
+Chime is a high-performance chat server designed specifically to be used in conjunction with Smart TV applications. Chime can be deployed as either a monolithic instance or as a group of worker instances reporting to a master as pictured below.
 
+### Design
+![alt text](https://github.com/mleef/Chime/raw/master/backend/resources/prototype.png "Monolith")
+
+![alt text](https://github.com/mleef/Chime/raw/master/backend/resources/final.png "Worker/Master")
 
 ## Backend Usage
 
@@ -42,7 +46,7 @@ Uses HTTP messages to coordinate a set of load balanced workers that can be scal
 To instantiate a Chime Master instance do:
 
 ```
-java -jar chime-worker.jar [Optional port #]
+java -jar chime-master.jar [Optional port #]
 ```
 
 To instantiate a Chime Worker instance do:
