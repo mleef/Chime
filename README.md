@@ -1,6 +1,6 @@
 ---
 title: Chime
-description: Precision probe set coverage for custom sequences
+description: Real Time Channel Based Messaging for Smart TVs
 author: Marc Leef
 created:  2015 November 15
 modified: 2016 January 10
@@ -16,13 +16,13 @@ Chime is a high-performance chat server designed specifically to be used in conj
 ## Backend Usage
 
 ### Default Ports
-1. **Socket Connections:**
+1. **Socket Connections (Monolith/Worker):**
 	4444
-2. **Web Socket Connections:**
+2. **Web Socket Connections (Monolith/Worker):**
 	4445
-3. **HTTP Requests:**
+3. **HTTP Requests (Monolith/Worker):**
 	4567
-4. **Master**
+4. **HTTP Requests (Master)**
 	4500
 
 ### Monolithic Chime Instances
@@ -52,6 +52,12 @@ java -jar chime-worker.jar [Chime Master URL]
 ```
 
 ## Frontend Usage
+
+Chime instances can be communicated with using JSON messages written to socket/web socket streams or sent via HTTP requests. Clients open and maintain
+a singular socket connection which is then used to update the backend of channel changes and chime sending events. 
+
+
+### Chime Monolith Communication
 
 To connect to a monolithic Chime instance from a browser do:
 
@@ -87,12 +93,14 @@ var chime = {
 socket.send(JSON.stringify(chime));
 ```
 
+### Chime Worker/Master Communication
+
 To connect to a Chime Worker instance first send a POST request to the master to be assigned a worker:
 ```
 [Chime Master URL]/worker/assignment
 ```
 
-The response should be a success object that contains a worker URL to connect to:
+The response should be a success object that contains a worker URL to connect to (open socket with as above):
 ```
 {
     success : "[Worker URL]"
