@@ -57,7 +57,7 @@ public class WorkerRestManager implements Runnable {
 
         // Get list of all televisions managed by this node
         get(Endpoints.TELEVISIONS, (request, response) -> {
-            logger.info("GET TELEVISIONS - ALL");
+            logger.info("GET: TELEVISIONS - ALL");
             try {
                 return gson.toJson(televisionMap.getTelevisions().addAll(televisionWSMap.getTelevisions()));
             } catch (Exception e) {
@@ -68,7 +68,7 @@ public class WorkerRestManager implements Runnable {
 
         // Get list of all socket connected televisions managed by this node
         get(Endpoints.SOCKETS, (request, response) -> {
-            logger.info("GET TELEVISIONS - SOCKETS");
+            logger.info("GET: TELEVISIONS - SOCKETS");
             try {
                 return gson.toJson(televisionMap.getTelevisions());
             } catch (Exception e) {
@@ -79,7 +79,7 @@ public class WorkerRestManager implements Runnable {
 
         // Get list of all web socket connected televisions managed by this node
         get(Endpoints.WEB_SOCKETS, (request, response) -> {
-            logger.info("GET TELEVISIONS - WEB SOCKETS");
+            logger.info("GET: TELEVISIONS - WEB SOCKETS");
             try {
                 return gson.toJson(televisionWSMap.getTelevisions());
             } catch (Exception e) {
@@ -90,7 +90,7 @@ public class WorkerRestManager implements Runnable {
 
         // Send Chimes to televisions.
         post(Endpoints.CHIME, (request, response) -> {
-            logger.info("POST CHIME");
+            logger.info("POST: CHIME");
             try {
                 TelevisionsMessage televisionsMessage = gson.fromJson(request.body(), TelevisionsMessage.class);
                 sender.broadcast(televisionsMessage.getTelevisions(), televisionsMessage.getChimeMessage());
@@ -99,6 +99,14 @@ public class WorkerRestManager implements Runnable {
                 logger.error(e.toString());
                 return gson.toJson(new ErrorMessage(e.toString()));
             }
+        });
+
+        // Handle master shut down
+        post(Endpoints.MASTER_SHUTDOWN, (request, response) -> {
+            logger.info("POST: MASTER SHUTDOWN");
+            logger.info("Lost contact with master, shutting down...");
+            System.exit(0);
+            return new SuccessMessage("Shutting down...");
         });
 
 

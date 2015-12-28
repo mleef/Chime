@@ -40,5 +40,7 @@ public class ChimeMasterManager {
         logger.info(String.format("Starting Chime Master port %d...", portNumber));
         new Thread(masterRestManager).start();
 
+
+
     }
 }

@@ -72,9 +72,9 @@ public class MasterRestManager implements Runnable {
 
         // Process new worker registrations
         post(Endpoints.WORKER_REGISTRATION, (request, response) -> {
-            logger.info(String.format("POST SLAVE REGISTRATION - %s", request.url()));
+            logger.info(String.format("POST: WORKER REGISTRATION - %s", request.url()));
             try {
-                workerMap.addChannel(new Channel(request.ip()));
+                workerMap.addChannel(new Channel(request.ip() + request.port()));
                 return gson.toJson(new SuccessMessage("Slave Registration confirmed"));
             } catch(Exception e) {
                 logger.error(e.toString());
@@ -84,7 +84,7 @@ public class MasterRestManager implements Runnable {
 
         // Assign new workers to clients
         post(Endpoints.WORKER_ASSIGNMENT, (request, response) -> {
-            logger.info(String.format("POST SLAVE REGISTRATION - %s", request.url()));
+            logger.info(String.format("POST: WORKER REQUESTED - %s", request.url()));
             try {
                 SuccessMessage successMessage = new SuccessMessage(getNextWorker());
                 // If there are available workers
@@ -101,7 +101,7 @@ public class MasterRestManager implements Runnable {
 
         // Send Chimes
         post(Endpoints.CHIME, (request, response) -> {
-            logger.info("POST CHIME");
+            logger.info("POST: CHIME");
             try {
                 sendChimes(gson.fromJson(request.body(), ChimeMessage.class));
                 return gson.toJson(new SuccessMessage("Chimes sent"));
@@ -113,7 +113,7 @@ public class MasterRestManager implements Runnable {
 
         // Process new television registrations
         post(Endpoints.TV_REGISTRATION, (request, response) -> {
-            logger.info("POST REGISTRATION");
+            logger.info("POST: TV REGISTRATION");
             try {
                 SuccessMessage successMessage;
                 RegistrationMessage registrationMessage = gson.fromJson(request.body(), RegistrationMessage.class);
@@ -127,7 +127,7 @@ public class MasterRestManager implements Runnable {
 
         // Remove television from channel
         delete("/television/register/:television/:channel", (request, response) -> {
-            logger.info("POST DELETION - %s: (%s -> %s)", request.params(":television"), request.params(":previousChannel"), request.params(":newChannel"));
+            logger.info("POST: DELETION - %s: (%s -> %s)", request.params(":television"), request.params(":previousChannel"), request.params(":newChannel"));
             try {
                 mapper.clearTelevision(new Channel(request.params(":channel")), new Television(request.params(":television")));
                 return gson.toJson(new SuccessMessage("Television removed from channel"));
@@ -135,6 +135,14 @@ public class MasterRestManager implements Runnable {
                 logger.error(e.toString());
                 return gson.toJson(new ErrorMessage(e.toString()));
             }
+        });
+
+        // Handle worker shut down
+        post(Endpoints.WORKER_SHUTDOWN, (request, response) -> {
+            logger.info("POST: WORKER SHUTDOWN");
+            logger.info("Lost contact with worker, removing from map...");
+            workerMap.remove(request.ip() + request.port());
+            return new SuccessMessage("Shutting down...");
         });
 
     }
@@ -168,12 +176,26 @@ public class MasterRestManager implements Runnable {
      **/
     private String getNextWorker() {
         for(Channel channel : workerMap.keySet()) {
-            if(workerMap.getTotalViewers() < SOCKETS_PER_WORKER) {
+            if(workerMap.get(channel).size() < SOCKETS_PER_WORKER) {
                 return channel.getId();
             }
         }
         // All slaves at capacity, can't connect
         return null;
+    }
+
+
+    /**
+     * Alerts registered workers of shutdown event.
+     **/
+    public void shutdown() {
+        for(Channel channel : workerMap.keySet()) {
+            try {
+                sender.post(channel.getId() + Endpoints.MASTER_SHUTDOWN, null);
+            } catch(Exception e) {
+                logger.error(e.toString());
+            }
+        }
     }
 
 

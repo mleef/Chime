@@ -64,7 +64,7 @@ public class ChimeRestManager implements Runnable {
         });
 
         // Get list of all channels
-        get("/channel/list", (request, response) -> {
+        get(Endpoints.LIST_CHANNELS, (request, response) -> {
             logger.info("GET CHANNELS - ALL");
             try {
                 return gson.toJson(channelMap.getChannels());
@@ -75,7 +75,7 @@ public class ChimeRestManager implements Runnable {
         });
 
         // Get total (active) viewers on all channels
-        get("/channel/count/all", (request, response) -> {
+        get(Endpoints.COUNT_ALL_CHANNELS, (request, response) -> {
             logger.info("GET VIEWERS - ALL");
             try {
                 return gson.toJson(televisionMap.getViewers() + televisionWSMap.getViewers());
@@ -86,7 +86,7 @@ public class ChimeRestManager implements Runnable {
         });
 
         // Get number of viewers on given channel
-        get("/channel/count/:channel", (request, response) -> {
+        get(Endpoints.COUNT_CHANNEL, (request, response) -> {
             logger.info(String.format("GET # VIEWERS - %s", request.params(":channel")));
             try {
                 return gson.toJson(channelMap.getChannelViewers(new Channel(request.params(":channel"))));
@@ -98,7 +98,7 @@ public class ChimeRestManager implements Runnable {
         });
 
         // Get televisions watching queried channel
-        get("/channel/watching/:channel", (request, response) -> {
+        get(Endpoints.WATCHING_TELEVISIONS, (request, response) -> {
             logger.info(String.format("GET VIEWERS - %s", request.params(":channel")));
             try {
                 return gson.toJson(channelMap.get(new Channel(request.params(":channel"))));
@@ -109,7 +109,7 @@ public class ChimeRestManager implements Runnable {
         });
 
         // Process registration messages from client
-        post("/television/register", (request, response) -> {
+        post(Endpoints.TV_REGISTRATION, (request, response) -> {
             logger.info("POST REGISTRATION");
             try {
                 RegistrationMessage registrationMessage = gson.fromJson(request.body(), RegistrationMessage.class);
@@ -122,7 +122,7 @@ public class ChimeRestManager implements Runnable {
         });
 
         // Remove television from channel
-        delete("/television/register/:television/:channel", (request, response) -> {
+        delete(Endpoints.REMOVE_TELEVISION, (request, response) -> {
             logger.info(String.format("POST REGISTRATION - %s: (%s -> %s)", request.params(":television"), request.params(":previousChannel"), request.params(":newChannel")));
             try {
                 mapper.clearTelevision(new Channel(request.params(":channel")), new Television(request.params(":television")));
@@ -134,7 +134,7 @@ public class ChimeRestManager implements Runnable {
         });
 
         // Send Chimes
-        post("/television/chime", (request, response) -> {
+        post(Endpoints.CHIME, (request, response) -> {
             logger.info("POST CHIME");
             try {
                 sender.broadcast(gson.fromJson(request.body(), ClientMessage.class).getChimeMessage());

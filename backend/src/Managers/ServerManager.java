@@ -33,13 +33,13 @@ public class ServerManager {
         Logger logger = LoggerFactory.getLogger(ServerManager.class);
 
         // Initialize socket based chime manager and begin execution
-        ChimeSocketManager chimeSocketManager = new ChimeSocketManager(portNumber, sender, mapper, false);
+        ChimeSocketManager chimeSocketManager = new ChimeSocketManager(portNumber, sender, mapper, null);
         logger.info(String.format("Starting Chime Socket Manager on port %d...", portNumber));
         new Thread(chimeSocketManager).start();
 
         // Initialize web socket based chime manager and begin execution
         try {
-            ChimeWebSocketManager chimeWebSocketManager = new ChimeWebSocketManager(portNumber + 1, sender, mapper, false);
+            ChimeWebSocketManager chimeWebSocketManager = new ChimeWebSocketManager(portNumber + 1, sender, mapper, null);
             logger.info(String.format("Starting Chime WebSocket Manager on port %d...", portNumber + 1));
             chimeWebSocketManager.start();
         } catch(Exception e) {

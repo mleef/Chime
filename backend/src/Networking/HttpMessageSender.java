@@ -43,7 +43,6 @@ public class HttpMessageSender {
             StringEntity params = new StringEntity(gson.toJson(message));
             request.setEntity(params);
         }
-
         request.addHeader("content-type", "application/json");
         HttpResponse result = client.execute(request);
         return EntityUtils.toString(result.getEntity(), "UTF-8");

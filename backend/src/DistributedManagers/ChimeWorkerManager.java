@@ -19,7 +19,7 @@ public class ChimeWorkerManager {
 
     public static void main(String[] args) {
         // Master URL
-        String MASTER_URL = args.length > 0 ? args[0] : "0.0.0.0:4500";
+        String MASTER_URL = args.length > 0 ? args[0] : "http://localhost:4500";
 
         // Create new data structures
         ChannelMap channelMap = new ChannelMap();
@@ -39,11 +39,12 @@ public class ChimeWorkerManager {
         int portNumber = 4444;
         Logger logger = LoggerFactory.getLogger(ChimeWorkerManager.class);
 
-        logger.info("Initializing new Chime slave...");
+        logger.info("Initializing new Chime Worker...");
 
         // Attempt to register with master
         try {
-            httpSender.post(Endpoints.WORKER_REGISTRATION, null);
+            httpSender.post(MASTER_URL + Endpoints.WORKER_REGISTRATION, null);
+            logger.info("Succesfully registered with master.");
         } catch(Exception e) {
             logger.error("Failed to register with master.");
             logger.error(e.toString());
