@@ -35,7 +35,7 @@ Constrained by the maximum number of TCP connections the host is capable of main
 
 To instantiate a monolithic Chime instance do:
 
-```
+```bash
 java -jar chime-monolith.jar
 ```
 
@@ -45,13 +45,13 @@ Uses HTTP messages to coordinate a set of load balanced workers that can be scal
 
 To instantiate a Chime Master instance do:
 
-```
+```bash
 java -jar chime-master.jar [Optional port #]
 ```
 
 To instantiate a Chime Worker instance do:
 
-```
+```bash
 java -jar chime-worker.jar [Chime Master URL]
 ```
 
@@ -65,19 +65,20 @@ a singular socket connection which is then used to update the backend of channel
 
 To connect to a monolithic Chime instance from a browser do:
 
-```
+```javascript
 socket = new WebSocket("ws://[Chime instance URL]"")
 ```
 
 Then send a registration message like so:
 
-```
+```javascript
 // Channel change event
 var registration = {
     registrationMessage : {
         previousChannel : null,
         newChannel : {id : "1"},
         television : {id : "marcs-tv"}
+        timeSent : "1000"
     }
 };
 // Send to server
@@ -85,7 +86,8 @@ socket.send(JSON.stringify(registration));
 ```
 
 Chimes can be sent similarly:
-```
+
+```javascript
 var chime = {
     chimeMessage : {
         channel : {id : "1"},
@@ -99,13 +101,13 @@ socket.send(JSON.stringify(chime));
 
 ### Chime Worker/Master Communication
 
-To connect to a Chime Worker instance first send a POST request to the master to be assigned a worker:
+To connect to a Chime Worker instance first send a HTTP POST request to the master to be assigned a worker:
 ```
 [Chime Master URL]/worker/assignment
 ```
 
 The response should be a success object that contains a worker URL to connect to (open socket with as above):
-```
+```javascript
 {
     success : "[Worker URL]"
 }
