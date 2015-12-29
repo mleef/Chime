@@ -66,7 +66,7 @@ a singular socket connection which is then used to update the backend of channel
 To connect to a monolithic Chime instance from a browser do:
 
 ```javascript
-socket = new WebSocket("ws://[Chime instance URL]"")
+socket = new WebSocket("ws://[Chime instance URL]")
 ```
 
 Then send a registration message like so:
@@ -88,6 +88,7 @@ socket.send(JSON.stringify(registration));
 Chimes can be sent similarly:
 
 ```javascript
+// New Chime message from client
 var chime = {
     chimeMessage : {
         channel : {id : "1"},
@@ -96,6 +97,7 @@ var chime = {
         timeSent : "1000"
     }
 };
+// Send to server
 socket.send(JSON.stringify(chime));
 ```
 
