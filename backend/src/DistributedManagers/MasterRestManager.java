@@ -74,7 +74,8 @@ public class MasterRestManager implements Runnable {
         post(Endpoints.WORKER_REGISTRATION, (request, response) -> {
             logger.info(String.format("POST: WORKER REGISTRATION - %s", request.url()));
             try {
-                workerMap.addChannel(new Channel(request.ip() + ":" + request.port()));
+                // Use default Spark port for workers
+                workerMap.addChannel(new Channel(request.ip() + ":4567"));
                 return gson.toJson(new SuccessMessage("Worker Registration confirmed"));
             } catch(Exception e) {
                 logger.error(e.toString());
@@ -192,9 +193,8 @@ public class MasterRestManager implements Runnable {
         // Send shutdown message to each worker
         for(Channel channel : workerMap.keySet()) {
             try {
-                sender.post(channel.getId() + Endpoints.MASTER_SHUTDOWN, null);
+                sender.post("http://" + channel.getId() + Endpoints.MASTER_SHUTDOWN, null);
             } catch(Exception e) {
-                e.printStackTrace();
                 logger.error(e.toString());
             }
         }
