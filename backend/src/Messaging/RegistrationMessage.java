@@ -12,11 +12,13 @@ public class RegistrationMessage extends Message {
     private Channel previousChannel;
     private Channel newChannel;
     private Television television;
+    private String timeSent;
 
-    public RegistrationMessage(Channel previousChannel, Channel newChannel, Television television) {
+    public RegistrationMessage(Channel previousChannel, Channel newChannel, Television television, String timeSent) {
         this.previousChannel = previousChannel;
         this.newChannel = newChannel;
         this.television = television;
+        this.timeSent = timeSent;
     }
 
     /**
@@ -24,7 +26,7 @@ public class RegistrationMessage extends Message {
      * @return True if all fields aren't null, false otherwise.
      **/
     public boolean isValid() {
-        return (this.newChannel != null) && (this.television != null);
+        return (this.newChannel != null) && (this.television != null) && (this.timeSent != null);
     }
 
     public Channel getPreviousChannel() { return previousChannel; }

@@ -30,6 +30,7 @@ public class MasterRestManager implements Runnable {
     private Logger logger;
     private Gson gson;
     private final int SOCKETS_PER_WORKER = 1000;
+    private final String WORKER_REQUEST_PORT = "4567";
 
     /**
      * Constructor for the MasterRestManager class.
@@ -75,7 +76,7 @@ public class MasterRestManager implements Runnable {
             logger.info(String.format("POST: WORKER REGISTRATION - %s", request.url()));
             try {
                 // Use default Spark port for workers
-                workerMap.addChannel(new Channel(request.ip() + ":4567"));
+                workerMap.addChannel(new Channel(request.ip() + ":" + WORKER_REQUEST_PORT));
                 return gson.toJson(new SuccessMessage("Worker Registration confirmed"));
             } catch(Exception e) {
                 logger.error(e.toString());
@@ -142,8 +143,14 @@ public class MasterRestManager implements Runnable {
         post(Endpoints.WORKER_SHUTDOWN, (request, response) -> {
             logger.info("POST: WORKER SHUTDOWN");
             logger.info("Lost contact with worker, removing from map...");
-            workerMap.remove(request.ip() + request.port());
-            return new SuccessMessage("Shutting down...");
+            try {
+                workerMap.remove(new Channel(request.ip() + ":" + WORKER_REQUEST_PORT));
+                return new SuccessMessage("Shutting down...");
+            } catch (Exception e) {
+                logger.error(e.toString());
+                return gson.toJson(new ErrorMessage("Failed to remove worker from map."));
+            }
+
         });
 
     }
