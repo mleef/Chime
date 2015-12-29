@@ -43,7 +43,6 @@ public class HttpMessageSender {
      * @param message Message to send.
      **/
     public String post(String url, Message message) throws Exception {
-        System.out.println(url);
         HttpPost request = new HttpPost(url);
         if(message != null) {
             StringEntity params = new StringEntity(gson.toJson(message));
