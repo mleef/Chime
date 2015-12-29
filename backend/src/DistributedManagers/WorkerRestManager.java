@@ -1,7 +1,9 @@
 package DistributedManagers;
 import DataStructures.*;
 import Messaging.*;
+import Networking.HttpMessageSender;
 import Networking.SocketMessageSender;
+import TV.Channel;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,23 +14,30 @@ import static spark.Spark.*;
  * Manage HTTP requests to maintain consistency with master.
  */
 public class WorkerRestManager implements Runnable {
-    private SocketMessageSender sender;
+    private SocketMessageSender socketSender;
+    private HttpMessageSender httpSender;
     private TelevisionMap televisionMap;
     private TelevisionWSMap televisionWSMap;
     private Gson gson;
     private Logger logger;
+    private String masterURL;
 
     /**
      * Constructor for the SlaveRestManager class.
+     * @param socketSender For writing messages to sockets.
+     * @param httpSender For sending HTTP messages to master.
      * @param televisionMap Mapping of televisions to associated sockets.
      * @param televisionWSMap Mapping of televisions to associated web sockets.
+     * @param masterURL URL of master node.
      **/
-    public WorkerRestManager(SocketMessageSender sender, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap) {
-        this.sender = sender;
+    public WorkerRestManager(SocketMessageSender socketSender, HttpMessageSender httpSender, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap, String masterURL) {
+        this.socketSender = socketSender;
         this.televisionMap = televisionMap;
         this.televisionWSMap = televisionWSMap;
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(WorkerRestManager.class);
+        this.httpSender = httpSender;
+        this.masterURL = masterURL;
     }
 
     @Override
@@ -37,21 +46,21 @@ public class WorkerRestManager implements Runnable {
      **/
     public void run() {
         // Allow cross origin requests
-        options("/*", (request,response)->{
+        options("/*", (request, response) -> {
             String accessControlRequestHeaders = request.headers("Access-Control-Request-Headers");
             if (accessControlRequestHeaders != null) {
                 response.header("Access-Control-Allow-Headers", accessControlRequestHeaders);
             }
 
             String accessControlRequestMethod = request.headers("Access-Control-Request-Method");
-            if(accessControlRequestMethod != null){
+            if (accessControlRequestMethod != null) {
                 response.header("Access-Control-Allow-Methods", accessControlRequestMethod);
             }
             return "OK";
         });
 
         // Add headers to response
-        before((request,response)->{
+        before((request, response) -> {
             response.header("Access-Control-Allow-Origin", "*");
         });
 
@@ -93,9 +102,9 @@ public class WorkerRestManager implements Runnable {
             logger.info("POST: CHIME");
             try {
                 TelevisionsMessage televisionsMessage = gson.fromJson(request.body(), TelevisionsMessage.class);
-                sender.broadcast(televisionsMessage.getTelevisions(), televisionsMessage.getChimeMessage());
+                socketSender.broadcast(televisionsMessage.getTelevisions(), televisionsMessage.getChimeMessage());
                 return gson.toJson(new SuccessMessage("Chime sent"));
-            } catch(Exception e) {
+            } catch (Exception e) {
                 logger.error(e.toString());
                 return gson.toJson(new ErrorMessage(e.toString()));
             }
@@ -108,7 +117,16 @@ public class WorkerRestManager implements Runnable {
             System.exit(0);
             return new SuccessMessage("Shutting down...");
         });
+    }
 
-
+    /**
+     * Alerts master of shutdown event.
+     **/
+    public void shutdown() {
+        try {
+            httpSender.post(masterURL + Endpoints.WORKER_SHUTDOWN, null);
+        } catch(Exception e) {
+            logger.error(e.toString());
+        }
     }
 }

@@ -74,8 +74,8 @@ public class MasterRestManager implements Runnable {
         post(Endpoints.WORKER_REGISTRATION, (request, response) -> {
             logger.info(String.format("POST: WORKER REGISTRATION - %s", request.url()));
             try {
-                workerMap.addChannel(new Channel(request.ip() + request.port()));
-                return gson.toJson(new SuccessMessage("Slave Registration confirmed"));
+                workerMap.addChannel(new Channel(request.ip() + ":" + request.port()));
+                return gson.toJson(new SuccessMessage("Worker Registration confirmed"));
             } catch(Exception e) {
                 logger.error(e.toString());
                 return gson.toJson(new ErrorMessage(e.toString()));
@@ -157,7 +157,7 @@ public class MasterRestManager implements Runnable {
         Set<Television> watchingTelevisions = channelMap.get(chimeMessage.getChannel());
 
         for(Channel channel : workerMap.keySet()) {
-            // Union slave TVs with watching TVs
+            // Union worker TVs with watching TVs
             Set<Television> televisions = workerMap.get(channel);
             televisions.retainAll(watchingTelevisions);
 
@@ -189,10 +189,12 @@ public class MasterRestManager implements Runnable {
      * Alerts registered workers of shutdown event.
      **/
     public void shutdown() {
+        // Send shutdown message to each worker
         for(Channel channel : workerMap.keySet()) {
             try {
                 sender.post(channel.getId() + Endpoints.MASTER_SHUTDOWN, null);
             } catch(Exception e) {
+                e.printStackTrace();
                 logger.error(e.toString());
             }
         }
