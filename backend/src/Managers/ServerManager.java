@@ -2,6 +2,7 @@ package Managers;
 
 import DataStructures.*;
 
+import Networking.HttpMessageSender;
 import Networking.SocketMessageSender;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
@@ -26,20 +27,21 @@ public class ServerManager {
         MapManager mapper = new MapManager(channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap);
 
         // For sending messages to clients
-        SocketMessageSender sender = new SocketMessageSender(mapper, channelMap, televisionMap, televisionWSMap);
+        SocketMessageSender socketMessageSender = new SocketMessageSender(mapper, channelMap, televisionMap, televisionWSMap);
+        HttpMessageSender httpMessageSender = new HttpMessageSender();
 
         // Set port and logger
         int portNumber = 4444;
         Logger logger = LoggerFactory.getLogger(ServerManager.class);
 
         // Initialize socket based chime manager and begin execution
-        ChimeSocketManager chimeSocketManager = new ChimeSocketManager(portNumber, sender, mapper, null);
+        ChimeSocketManager chimeSocketManager = new ChimeSocketManager(portNumber, socketMessageSender, httpMessageSender, mapper, null);
         logger.info(String.format("Starting Chime Socket Manager on port %d...", portNumber));
         new Thread(chimeSocketManager).start();
 
         // Initialize web socket based chime manager and begin execution
         try {
-            ChimeWebSocketManager chimeWebSocketManager = new ChimeWebSocketManager(portNumber + 1, sender, mapper, null);
+            ChimeWebSocketManager chimeWebSocketManager = new ChimeWebSocketManager(portNumber + 1, socketMessageSender, mapper, null);
             logger.info(String.format("Starting Chime WebSocket Manager on port %d...", portNumber + 1));
             chimeWebSocketManager.start();
         } catch(Exception e) {
@@ -49,7 +51,7 @@ public class ServerManager {
 
 
         // Initialize RESTful API interface to handle HTTP requests
-        ChimeRestManager chimeRestManager = new ChimeRestManager(sender, mapper, channelMap, televisionMap, televisionWSMap);
+        ChimeRestManager chimeRestManager = new ChimeRestManager(socketMessageSender, mapper, channelMap, televisionMap, televisionWSMap);
         logger.info(String.format("Starting Chime REST Manager on port %d...", 4567));
         new Thread(chimeRestManager).start();
 

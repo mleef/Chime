@@ -14,8 +14,8 @@ import static spark.Spark.*;
  * Manage HTTP requests to maintain consistency with master.
  */
 public class WorkerRestManager implements Runnable {
-    private SocketMessageSender socketSender;
-    private HttpMessageSender httpSender;
+    private SocketMessageSender socketMessageSender;
+    private HttpMessageSender httpMessageSender;
     private TelevisionMap televisionMap;
     private TelevisionWSMap televisionWSMap;
     private Gson gson;
@@ -24,19 +24,19 @@ public class WorkerRestManager implements Runnable {
 
     /**
      * Constructor for the SlaveRestManager class.
-     * @param socketSender For writing messages to sockets.
-     * @param httpSender For sending HTTP messages to master.
+     * @param socketMessageSender For writing messages to sockets.
+     * @param httpMessageSender For sending HTTP messages to master.
      * @param televisionMap Mapping of televisions to associated sockets.
      * @param televisionWSMap Mapping of televisions to associated web sockets.
      * @param masterURL URL of master node.
      **/
-    public WorkerRestManager(SocketMessageSender socketSender, HttpMessageSender httpSender, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap, String masterURL) {
-        this.socketSender = socketSender;
+    public WorkerRestManager(SocketMessageSender socketMessageSender, HttpMessageSender httpMessageSender, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap, String masterURL) {
+        this.socketMessageSender = socketMessageSender;
         this.televisionMap = televisionMap;
         this.televisionWSMap = televisionWSMap;
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(WorkerRestManager.class);
-        this.httpSender = httpSender;
+        this.httpMessageSender = httpMessageSender;
         this.masterURL = masterURL;
     }
 
@@ -102,7 +102,7 @@ public class WorkerRestManager implements Runnable {
             logger.info("POST: CHIME");
             try {
                 TelevisionsMessage televisionsMessage = gson.fromJson(request.body(), TelevisionsMessage.class);
-                socketSender.broadcast(televisionsMessage.getTelevisions(), televisionsMessage.getChimeMessage());
+                socketMessageSender.broadcast(televisionsMessage.getTelevisions(), televisionsMessage.getChimeMessage());
                 return gson.toJson(new SuccessMessage("Chime sent"));
             } catch (Exception e) {
                 logger.error(e.toString());
@@ -124,7 +124,7 @@ public class WorkerRestManager implements Runnable {
      **/
     public void shutdown() {
         try {
-            httpSender.post(masterURL + Endpoints.WORKER_SHUTDOWN, null);
+            httpMessageSender.post(masterURL + Endpoints.WORKER_SHUTDOWN, null);
         } catch(Exception e) {
             logger.error(e.toString());
         }

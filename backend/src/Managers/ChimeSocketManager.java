@@ -1,6 +1,7 @@
 package Managers;
 
 import Handlers.ConnectionHandler;
+import Networking.HttpMessageSender;
 import Networking.SocketMessageSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,21 +20,24 @@ public class ChimeSocketManager implements Runnable {
     private ServerSocketChannel serverChannel;
     private int portNumber;
     private Logger logger;
-    private SocketMessageSender sender;
+    private SocketMessageSender socketMessageSender;
+    private HttpMessageSender httpMessageSender;
     private MapManager mapper;
     private String masterUrl;
 
     /**
      * Constructor for the ChimeSocketManager class.
      * @param  portNumber Port to listen on.
-     * @param sender To handle messaging.
+     * @param socketMessageSender To handle messaging.
+     * @param httpMessageSender To send HTTP messages to master.
      * @param mapper To handle map updates.
      * @param masterUrl Determines behavior of manager (worker node vs. monolith)
      **/
-    public ChimeSocketManager(int portNumber, SocketMessageSender sender, MapManager mapper, String masterUrl) {
+    public ChimeSocketManager(int portNumber, SocketMessageSender socketMessageSender, HttpMessageSender httpMessageSender, MapManager mapper, String masterUrl) {
         this.portNumber = portNumber;
         this.logger = LoggerFactory.getLogger(ChimeSocketManager.class);
-        this.sender = sender;
+        this.socketMessageSender = socketMessageSender;
+        this.httpMessageSender = httpMessageSender;
         this.mapper = mapper;
         this.masterUrl = masterUrl;
     }
@@ -121,7 +125,7 @@ public class ChimeSocketManager implements Runnable {
             }
         }
         // Dispatch thread to handle aggregated messages
-        new Thread(new ConnectionHandler(sockets, messages, sender, mapper)).start();
+        new Thread(new ConnectionHandler(sockets, messages, socketMessageSender, httpMessageSender, mapper, masterUrl)).start();
     }
 
     /**

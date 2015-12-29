@@ -1,1 +1,12 @@
-{"registrationMessage": {"previousChannel": null,"newChannel": {"id": "2"},"television": {"id": "tv1"}}}
+{
+  "registrationMessage": {
+    "previousChannel": null,
+    "newChannel": {
+      "id": "2"
+    },
+    "television": {
+      "id": "tv1"
+    },
+    "timeSent": "1000"
+  }
+}

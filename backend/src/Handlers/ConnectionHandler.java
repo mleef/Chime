@@ -8,6 +8,7 @@ import DataStructures.SocketMap;
 import DataStructures.TelevisionMap;
 import Managers.MapManager;
 import Messaging.*;
+import Networking.HttpMessageSender;
 import Networking.SocketMessageSender;
 import com.google.gson.*;
 import org.slf4j.LoggerFactory;
@@ -23,9 +24,11 @@ public class ConnectionHandler extends Handler {
     private ChannelMap channelMap;
     private TelevisionMap televisionMap;
     private SocketMap socketMap;
+    private String masterUrl;
     private Gson gson;
     private Logger logger;
-    private SocketMessageSender sender;
+    private SocketMessageSender socketMessageSender;
+    private HttpMessageSender httpMessageSender;
     private MapManager mapper;
     private ArrayList<SocketChannel> registrationClients;
     private ArrayList<RegistrationMessage> registrationMessages;
@@ -36,8 +39,14 @@ public class ConnectionHandler extends Handler {
     /**
      * Constructor for ChimeHandler class.
      * @param clients Socket of television that sent message.
+     * @param mapper To manage map updates.
+     * @param messages List of client messages to be processed.
+     * @param socketMessageSender To write messages to sockets.
+     * @param httpMessageSender To send HTTP messages to master.
+     * @param masterUrl Determines behavior of handler (worker node vs. monolith).
+
      **/
-    public ConnectionHandler(ArrayList<SocketChannel> clients, ArrayList<String> messages, SocketMessageSender sender, MapManager mapper) {
+    public ConnectionHandler(ArrayList<SocketChannel> clients, ArrayList<String> messages, SocketMessageSender socketMessageSender, HttpMessageSender httpMessageSender, MapManager mapper, String masterUrl) {
         this.clients = clients;
         this.messages = messages;
         this.gson = new Gson();
@@ -45,8 +54,10 @@ public class ConnectionHandler extends Handler {
         this.registrationClients = new ArrayList<>();
         this.registrationMessages = new ArrayList<>();
         this.chimeMessages = new ArrayList<>();
-        this.sender = sender;
+        this.socketMessageSender = socketMessageSender;
+        this.httpMessageSender = httpMessageSender;
         this.mapper = mapper;
+        this.masterUrl = masterUrl;
     }
 
     /**
@@ -84,11 +95,11 @@ public class ConnectionHandler extends Handler {
             // Dispatch threads to handle new messages
             if(registrationMessages.size() > 0) {
                 logger.info("Dispatching Register handler...");
-                new Thread(new RegisterHandler(registrationClients, registrationMessages, mapper)).start();
+                new Thread(new RegistrationHandler(registrationClients, registrationMessages, mapper, httpMessageSender, masterUrl)).start();
             }
             if(chimeMessages.size() > 0) {
                 logger.info("Dispatching Chime handler...");
-                new Thread(new ChimeHandler(chimeMessages, sender)).start();
+                new Thread(new ChimeHandler(chimeMessages, socketMessageSender, httpMessageSender, masterUrl)).start();
             }
 
         } catch (Exception e) {

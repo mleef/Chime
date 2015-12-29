@@ -43,7 +43,7 @@ public class HttpMessageSender {
      * @param message Message to send.
      **/
     public String post(String url, Message message) throws Exception {
-        HttpPost request = new HttpPost(url);
+        HttpPost request = new HttpPost("http://" + url);
         if(message != null) {
             StringEntity params = new StringEntity(gson.toJson(message));
             request.setEntity(params);
@@ -58,7 +58,7 @@ public class HttpMessageSender {
      * @param url Destination url.
      **/
     public String get(String url) throws Exception {
-        HttpGet request = new HttpGet(url);
+        HttpGet request = new HttpGet("http://" + url);
         request.addHeader("content-type", "application/json");
         HttpResponse result = client.execute(request);
         return EntityUtils.toString(result.getEntity(), "UTF-8");

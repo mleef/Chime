@@ -26,7 +26,7 @@ public class MasterRestManager implements Runnable {
     private ChannelMap channelMap;
     private ChannelMap workerMap;
     private MapManager mapper;
-    private HttpMessageSender sender;
+    private HttpMessageSender httpMessageSender;
     private Logger logger;
     private Gson gson;
     private final int SOCKETS_PER_WORKER = 1000;
@@ -34,15 +34,18 @@ public class MasterRestManager implements Runnable {
 
     /**
      * Constructor for the MasterRestManager class.
+     * @param portNumber Default port to listen on.
      * @param channelMap Mapping of channels to watching televisions.
+     * @param workerMap Mapping ot worker URLs to associated televisions.
      * @param mapper To manage updates to the various maps.
+     * @param httpMessageSender To send HTTP messages to workers.
      **/
-    public MasterRestManager(int portNumber, ChannelMap channelMap, ChannelMap workerMap, MapManager mapper, HttpMessageSender sender) {
+    public MasterRestManager(int portNumber, ChannelMap channelMap, ChannelMap workerMap, MapManager mapper, HttpMessageSender httpMessageSender) {
         port(portNumber);
         this.channelMap = channelMap;
         this.workerMap = workerMap;
         this.mapper = mapper;
-        this.sender = sender;
+        this.httpMessageSender = httpMessageSender;
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(MasterRestManager.class);
     }
@@ -120,6 +123,7 @@ public class MasterRestManager implements Runnable {
                 SuccessMessage successMessage;
                 RegistrationMessage registrationMessage = gson.fromJson(request.body(), RegistrationMessage.class);
                 mapper.addTelevisionToChannel(registrationMessage.getTelevision(), registrationMessage.getPreviousChannel(), registrationMessage.getNewChannel());
+                workerMap.putTV(new Channel(request.ip() + ":" + WORKER_REQUEST_PORT), registrationMessage.getTelevision());
                 return gson.toJson(new SuccessMessage("Registration confirmed"));
             } catch(Exception e) {
                 logger.error(e.toString());
@@ -170,8 +174,9 @@ public class MasterRestManager implements Runnable {
             televisions.retainAll(watchingTelevisions);
 
             try {
+                logger.info(String.format("Worker %s is managing %d relevant televisions, delegating Chime...", channel.getId(), televisions.size()));
                 // Relay message to worker
-                sender.post(channel.getId(), new TelevisionsMessage(televisions, chimeMessage));
+                httpMessageSender.post(channel.getId() + Endpoints.CHIME, new TelevisionsMessage(televisions, chimeMessage));
             } catch (Exception e) {
                 logger.error(e.toString());
             }
@@ -200,7 +205,7 @@ public class MasterRestManager implements Runnable {
         // Send shutdown message to each worker
         for(Channel channel : workerMap.keySet()) {
             try {
-                sender.post("http://" + channel.getId() + Endpoints.MASTER_SHUTDOWN, null);
+                httpMessageSender.post(channel.getId() + Endpoints.MASTER_SHUTDOWN, null);
             } catch(Exception e) {
                 logger.error(e.toString());
             }
