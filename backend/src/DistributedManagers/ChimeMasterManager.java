@@ -23,11 +23,11 @@ public class ChimeMasterManager {
         SocketMap socketMap = new SocketMap();
         WebSocketMap webSocketMap = new WebSocketMap();
 
-        // For managing mapping updates
-        MapManager mapper = new MapManager(channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap);
-
         // For sending messages to Chime slaves
-        HttpMessageSender sender = new HttpMessageSender();
+        HttpMessageSender httpMessageSender = new HttpMessageSender();
+
+        // For managing mapping updates
+        MapManager mapper = new MapManager(channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap, null, httpMessageSender);
 
         // Set port and logger
         int portNumber = args.length > 0 ? Integer.parseInt(args[0]) : 4500;
@@ -36,7 +36,7 @@ public class ChimeMasterManager {
         logger.info("Initializing new Chime master...");
 
         // Initialize RESTful API interface to handle HTTP requests
-        MasterRestManager masterRestManager = new MasterRestManager(portNumber, channelMap, workerMap, mapper, sender);
+        MasterRestManager masterRestManager = new MasterRestManager(portNumber, channelMap, workerMap, mapper, httpMessageSender);
         logger.info(String.format("Starting Chime Master port %d...", portNumber));
         new Thread(masterRestManager).start();
 

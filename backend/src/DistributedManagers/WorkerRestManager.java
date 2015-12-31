@@ -1,9 +1,9 @@
 package DistributedManagers;
 import DataStructures.*;
 import Messaging.*;
+import Networking.Endpoints;
 import Networking.HttpMessageSender;
 import Networking.SocketMessageSender;
-import TV.Channel;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

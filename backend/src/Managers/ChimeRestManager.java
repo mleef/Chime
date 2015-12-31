@@ -1,6 +1,7 @@
 package Managers;
 import DataStructures.*;
 import Messaging.*;
+import Networking.Endpoints;
 import Networking.SocketMessageSender;
 import TV.Channel;
 import TV.Television;

@@ -23,12 +23,14 @@ public class ServerManager {
         SocketMap socketMap = new SocketMap();
         WebSocketMap webSocketMap = new WebSocketMap();
 
+        // For commmunicating with master/worker
+        HttpMessageSender httpMessageSender = new HttpMessageSender();
+
         // For managing mapping updates
-        MapManager mapper = new MapManager(channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap);
+        MapManager mapper = new MapManager(channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap, null, httpMessageSender);
 
         // For sending messages to clients
         SocketMessageSender socketMessageSender = new SocketMessageSender(mapper, channelMap, televisionMap, televisionWSMap);
-        HttpMessageSender httpMessageSender = new HttpMessageSender();
 
         // Set port and logger
         int portNumber = 4444;
@@ -41,7 +43,7 @@ public class ServerManager {
 
         // Initialize web socket based chime manager and begin execution
         try {
-            ChimeWebSocketManager chimeWebSocketManager = new ChimeWebSocketManager(portNumber + 1, socketMessageSender, mapper, null);
+            ChimeWebSocketManager chimeWebSocketManager = new ChimeWebSocketManager(portNumber + 1, socketMessageSender, httpMessageSender, mapper, null);
             logger.info(String.format("Starting Chime WebSocket Manager on port %d...", portNumber + 1));
             chimeWebSocketManager.start();
         } catch(Exception e) {

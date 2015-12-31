@@ -1,7 +1,7 @@
 package Handlers;
 
 import Managers.MapManager;
-import Messaging.Endpoints;
+import Networking.Endpoints;
 import Messaging.RegistrationMessage;
 
 import java.nio.channels.SocketChannel;

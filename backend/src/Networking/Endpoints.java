@@ -1,4 +1,4 @@
-package Messaging;
+package Networking;
 
 /**
  * Created by marcleef on 12/23/15.
@@ -18,5 +18,5 @@ public class Endpoints {
     public static final String WATCHING_TELEVISIONS = "/channel/watching/:channel";
     public static final String MASTER_SHUTDOWN = "/master/shutdown";
     public static final String WORKER_SHUTDOWN = "/worker/shutdown";
-    public static final String REMOVE_TELEVISION = "/television/register/:television/:channel";
+    public static final String REMOVE_TELEVISION = "/television/delete/:television/:channel";
 }

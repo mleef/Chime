@@ -3,7 +3,7 @@ package Handlers;
 import java.util.ArrayList;
 
 import Messaging.ChimeMessage;
-import Messaging.Endpoints;
+import Networking.Endpoints;
 import Networking.HttpMessageSender;
 import Networking.SocketMessageSender;
 import org.slf4j.LoggerFactory;

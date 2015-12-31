@@ -2,6 +2,7 @@ package DistributedManagers;
 import DataStructures.ChannelMap;
 import Managers.MapManager;
 import Messaging.*;
+import Networking.Endpoints;
 import Networking.HttpMessageSender;
 
 import TV.Channel;
@@ -10,9 +11,7 @@ import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static spark.Spark.*;
 import static spark.Spark.delete;
@@ -120,7 +119,6 @@ public class MasterRestManager implements Runnable {
         post(Endpoints.TV_REGISTRATION, (request, response) -> {
             logger.info("POST: TV REGISTRATION");
             try {
-                SuccessMessage successMessage;
                 RegistrationMessage registrationMessage = gson.fromJson(request.body(), RegistrationMessage.class);
                 mapper.addTelevisionToChannel(registrationMessage.getTelevision(), registrationMessage.getPreviousChannel(), registrationMessage.getNewChannel());
                 workerMap.putTV(new Channel(request.ip() + ":" + WORKER_REQUEST_PORT), registrationMessage.getTelevision());
@@ -132,8 +130,8 @@ public class MasterRestManager implements Runnable {
         });
 
         // Remove television from channel
-        delete("/television/register/:television/:channel", (request, response) -> {
-            logger.info("POST: DELETION - %s: (%s -> %s)", request.params(":television"), request.params(":previousChannel"), request.params(":newChannel"));
+        post(Endpoints.REMOVE_TELEVISION, (request, response) -> {
+            logger.info("POST: TV DELETION");
             try {
                 mapper.clearTelevision(new Channel(request.params(":channel")), new Television(request.params(":television")));
                 return gson.toJson(new SuccessMessage("Television removed from channel"));

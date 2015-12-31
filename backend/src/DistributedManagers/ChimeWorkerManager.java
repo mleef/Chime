@@ -2,8 +2,7 @@ package DistributedManagers;
 
 import DataStructures.*;
 import Managers.*;
-import Messaging.Endpoints;
-import Messaging.RegistrationMessage;
+import Networking.Endpoints;
 import Networking.HttpMessageSender;
 import Networking.SocketMessageSender;
 import org.slf4j.Logger;
@@ -28,12 +27,14 @@ public class ChimeWorkerManager {
         SocketMap socketMap = new SocketMap();
         WebSocketMap webSocketMap = new WebSocketMap();
 
+        // For communicating with master
+        HttpMessageSender httpMessageSender = new HttpMessageSender();
+
         // For managing mapping updates
-        MapManager mapper = new MapManager(channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap);
+        MapManager mapper = new MapManager(channelMap, socketMap, webSocketMap, televisionMap, televisionWSMap, MASTER_URL, httpMessageSender);
 
         // For sending messages to clients
         SocketMessageSender socketMessageSender = new SocketMessageSender(mapper, channelMap, televisionMap, televisionWSMap);
-        HttpMessageSender httpMessageSender = new HttpMessageSender();
 
         // Set port and logger
         int portNumber = 4444;
@@ -49,7 +50,6 @@ public class ChimeWorkerManager {
         } catch(Exception e) {
             logger.error("Failed to register with master.");
             logger.error(e.toString());
-            e.printStackTrace();
             System.exit(0);
         }
 
@@ -60,7 +60,7 @@ public class ChimeWorkerManager {
 
         // Initialize web socket based chime manager and begin execution
         try {
-            ChimeWebSocketManager chimeWebSocketManager = new ChimeWebSocketManager(portNumber + 1, socketMessageSender, mapper, MASTER_URL);
+            ChimeWebSocketManager chimeWebSocketManager = new ChimeWebSocketManager(portNumber + 1, socketMessageSender, httpMessageSender, mapper, MASTER_URL);
             logger.info(String.format("Starting Chime WebSocket Manager on port %d...", portNumber + 1));
             chimeWebSocketManager.start();
         } catch(Exception e) {

@@ -5,6 +5,8 @@ import java.net.UnknownHostException;
 
 import Messaging.ChimeMessage;
 import Messaging.ClientMessage;
+import Networking.Endpoints;
+import Networking.HttpMessageSender;
 import Networking.SocketMessageSender;
 import Messaging.RegistrationMessage;
 import com.google.gson.Gson;
@@ -24,20 +26,24 @@ public class ChimeWebSocketManager extends WebSocketServer implements Runnable {
     private SocketMessageSender sender;
     private MapManager mapper;
     private String masterUrl;
+    private SocketMessageSender socketMessageSender;
+    private HttpMessageSender httpMessageSender;
 
     /**
      * Constructor for the ChimeWebSocketManager class.
      * @param port Port to listen on.
-     * @param sender To handle message sending.
+     * @param httpMessageSender To relay messages to master.
      * @param mapper To handle map updates.
+     * @param masterUrl To determine instance behavarior (monolith vs. master/worker)
      **/
-    public ChimeWebSocketManager(int port, SocketMessageSender sender, MapManager mapper, String masterUrl) throws UnknownHostException {
+    public ChimeWebSocketManager(int port, SocketMessageSender socketMessageSender, HttpMessageSender httpMessageSender, MapManager mapper, String masterUrl) throws UnknownHostException {
         super( new InetSocketAddress( port ) );
         this.gson = new Gson();
         this.logger = LoggerFactory.getLogger(ChimeWebSocketManager.class);
-        this.sender = sender;
         this.mapper = mapper;
         this.masterUrl = masterUrl;
+        this.socketMessageSender = socketMessageSender;
+        this.httpMessageSender = httpMessageSender;
     }
 
     /**
@@ -112,10 +118,27 @@ public class ChimeWebSocketManager extends WebSocketServer implements Runnable {
         // Determine next action based on message type
         if(registrationMessage != null && registrationMessage.isValid()) {
             logger.info(String.format("REGISTRATION - FROM: %s, NEW CHANNEL: %s", registrationMessage.getTelevision().getId(), registrationMessage.getNewChannel().getId()));
-            mapper.moveTelevision(registrationMessage, conn);
+            if (masterUrl != null) {
+                try {
+                    mapper.addTelevisionWS(registrationMessage.getTelevision(), conn);
+                    httpMessageSender.post(masterUrl + Endpoints.TV_REGISTRATION, registrationMessage);
+                } catch (Exception e) {
+                    logger.error(e.toString());
+                }
+            } else {
+                mapper.moveTelevision(registrationMessage, conn);
+            }
         } else if(chimeMessage != null && chimeMessage.isValid()) {
             logger.info(String.format("CHIME - CHANNEL: %s, FROM: %s, TIME SENT: %s MESSAGE: %s", chimeMessage.getChannel().getId(), chimeMessage.getSender().getId(), chimeMessage.getTimeSent(), chimeMessage.getMessage()));
-            sender.broadcast(chimeMessage);
+            if (masterUrl != null) {
+                try {
+                    httpMessageSender.post(masterUrl + Endpoints.CHIME, chimeMessage);
+                } catch (Exception e) {
+                    logger.error(e.toString());
+                }
+            } else {
+                socketMessageSender.broadcast(chimeMessage);
+            }
         } else {
             logger.error("Registration/Chime Message missing properties");
         }

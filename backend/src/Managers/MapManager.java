@@ -1,7 +1,9 @@
 package Managers;
 
 import DataStructures.*;
+import Networking.Endpoints;
 import Messaging.RegistrationMessage;
+import Networking.HttpMessageSender;
 import TV.Channel;
 import TV.Television;
 import org.java_websocket.WebSocket;
@@ -21,6 +23,8 @@ public class MapManager {
     private TelevisionWSMap televisionWSMap;
     private WebSocketMap webSocketMap;
     private Logger logger;
+    private HttpMessageSender httpMessageSender;
+    private String masterUrl;
 
     /**
      * Constructor for the MapManager class.
@@ -29,14 +33,18 @@ public class MapManager {
      * @param televisionMap Mapping of televisions to associated sockets.
      * @param televisionWSMap Mapping of televisions to associated web sockets.
      * @param webSocketMap Mapping of web sockets to associated televisions.
+     * @param masterUrl Determines behavior of chime instance (monolithic vs. master/worker)
+     * @param httpMessageSender To maintain consistency with master.
      **/
-    public MapManager(ChannelMap channelMap, SocketMap socketMap, WebSocketMap webSocketMap, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap) {
+    public MapManager(ChannelMap channelMap, SocketMap socketMap, WebSocketMap webSocketMap, TelevisionMap televisionMap, TelevisionWSMap televisionWSMap, String masterUrl, HttpMessageSender httpMessageSender) {
         this.channelMap = channelMap;
         this.socketMap = socketMap;
         this.webSocketMap = webSocketMap;
         this.televisionMap = televisionMap;
         this.televisionWSMap = televisionWSMap;
         this.logger = LoggerFactory.getLogger(MapManager.class);
+        this.masterUrl = masterUrl;
+        this.httpMessageSender = httpMessageSender;
     }
 
     /**
@@ -45,10 +53,14 @@ public class MapManager {
      * @param television Television to remove.
      **/
     public void clearTelevisionWS(Channel channel, Television television) {
-        logger.info(String.format("Removing %s from %s.", channel.getId(), television.getId()));
+        logger.info(String.format("Removing %s from %s.", television.getId(), channel.getId()));
+        if (masterUrl != null) {
+            updateMaster(channel, television);
+        } else {
+            channelMap.removeTV(channel, television);
+        }
         webSocketMap.remove(televisionWSMap.get(television));
         televisionWSMap.remove(television);
-        channelMap.removeTV(channel, television);
     }
 
     /**
@@ -81,10 +93,14 @@ public class MapManager {
      * @param television Television to remove.
      **/
     public void clearTelevision(Channel channel, Television television) {
-        logger.info(String.format("Removing %s from %s.", channel.getId(), television.getId()));
+        logger.info(String.format("Removing %s from %s.", television.getId(), channel.getId()));
+        if (masterUrl != null) {
+            updateMaster(channel, television);
+        } else {
+            channelMap.removeTV(channel, television);
+        }
         socketMap.remove(televisionMap.get(television));
         televisionMap.remove(television);
-        channelMap.removeTV(channel, television);
     }
 
     /**
@@ -150,6 +166,22 @@ public class MapManager {
     public void moveTelevision(RegistrationMessage registrationMessage, WebSocket client) {
         addTelevisionWS(registrationMessage.getTelevision(), client);
         addTelevisionToChannel(registrationMessage.getTelevision(), registrationMessage.getPreviousChannel(), registrationMessage.getNewChannel());
+    }
+
+    /**
+     * Maintain consistent mapping with master.
+     *
+     * @param channel    Channel to remove television from.
+     * @param television Television to remove.
+     **/
+    public void updateMaster(Channel channel, Television television) {
+        try {
+            logger.info("Updating master with mapping changes...");
+            httpMessageSender.post(masterUrl + Endpoints.REMOVE_TELEVISION.replace(":television", television.getId()).replace(":channel", channel.getId()), null);
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+
     }
 
 }

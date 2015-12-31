@@ -147,7 +147,9 @@ public class SocketMessageSender {
         // Remove all closed connection televisions from map
         for(Television television : televisionsToRemove) {
             channelMap.removeTV(channel, television);
+            mapper.updateMaster(channel, television);
         }
+
     }
 
 
