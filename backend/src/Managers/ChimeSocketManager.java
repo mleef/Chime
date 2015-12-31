@@ -63,7 +63,7 @@ public class ChimeSocketManager implements Runnable {
                 if (selector.select() <= 0) {
                     continue;
                 }
-                processSelectedKeys(selector.selectedKeys());
+                handleKeyChangeEvents(selector.selectedKeys());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,7 +75,7 @@ public class ChimeSocketManager implements Runnable {
      * @param selectedKeys Channel to associate new television object with.
      * @throws Exception
      **/
-    private void processSelectedKeys(Set selectedKeys) throws Exception {
+    private void handleKeyChangeEvents(Set selectedKeys) throws Exception {
         // To store socket channels and associated data
         ArrayList<SocketChannel> sockets = new ArrayList<>();
         ArrayList<String> messages = new ArrayList<>();
@@ -88,39 +88,39 @@ public class ChimeSocketManager implements Runnable {
             // Check if key is acceptable and register new socket if so
             if (key.isAcceptable()) {
                 // Register new socket channel
-                SocketChannel sChannel = serverChannel.accept();
-                sChannel.configureBlocking(false);
-                sChannel.register(key.selector(), SelectionKey.OP_READ);
-                logger.info(String.format("Received new connection: %s", sChannel.toString()));
+                SocketChannel socketChannel = serverChannel.accept();
+                socketChannel.configureBlocking(false);
+                socketChannel.register(key.selector(), SelectionKey.OP_READ);
+                logger.info(String.format("Received new connection: %s", socketChannel.toString()));
             }
 
             // Check if key has data to read
             if (key.isReadable()) {
                 // Get socket channel to read from and process message
-                SocketChannel sChannel = (SocketChannel) key.channel();
+                SocketChannel socketChannel = (SocketChannel) key.channel();
 
                 String msg = "";
                 // Handle dead connections
                 try {
-                    msg = processSocketRead(sChannel);
+                    msg = getSocketMessage(socketChannel);
                 } catch(Exception e) {
                     logger.error(e.toString());
-                    sChannel.close();
-                    mapper.clearTelevision(sChannel);
+                    socketChannel.close();
+                    mapper.clearTelevision(socketChannel);
                 }
 
                 // Data to read
                 if (msg.length() > 0) {
-                    logger.info(String.format("New readable data from: %s", sChannel.toString()));
+                    logger.info(String.format("New readable data from: %s", socketChannel.toString()));
                     // Collect socket and channel for later handling
-                    sockets.add(sChannel);
+                    sockets.add(socketChannel);
                     messages.add(msg);
                 } else {
                     // Close socket once its done transmitting
-                    logger.info(String.format("Closed connection: %s", sChannel.toString()));
-                    sChannel.close();
+                    logger.info(String.format("Closed connection: %s", socketChannel.toString()));
+                    socketChannel.close();
                     // Update mappings to avoid leaks
-                    mapper.clearTelevision(sChannel);
+                    mapper.clearTelevision(socketChannel);
                 }
             }
         }
@@ -130,13 +130,13 @@ public class ChimeSocketManager implements Runnable {
 
     /**
      * Read data from socket into buffer then string.
-     * @param sChannel Television that is being added to channel.
+     * @param socketChannel Television that is being added to channel.
      * @return String representation of byte stream.
      **/
-    private String processSocketRead(SocketChannel sChannel) throws Exception {
+    private String getSocketMessage(SocketChannel socketChannel) throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(1024);
-        if(sChannel.isConnected()) {
-            int bytesCount = sChannel.read(buffer);
+        if (socketChannel.isConnected()) {
+            int bytesCount = socketChannel.read(buffer);
             if (bytesCount > 0) {
                 buffer.flip();
                 return new String(buffer.array()).trim();
