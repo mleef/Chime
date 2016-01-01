@@ -23,46 +23,19 @@ var makeID = function() {
 }
 
 window.onload = function () {
-    //var id = prompt("Please enter a username for the chat", "username");
+
+    // Generate unique alphanumeric identifier for user
     var id = makeID();
 
-    var registration = {
-        registrationMessage: {
-            previousChannel: null,
-            newChannel: {id: "1"},
-            television: {id: id}
-        }
-    };
-    var chime1 = {
-        chimeMessage : {
-            channel : {id: "1"},
-            television : {id : "Web TV"},
-            message : "I tried so hard.",
-            timeSent : "1000"
-        }
-    };
 
-    var chime2 = {
-        chimeMessage : {
-            channel : {id: "1"},
-            television : {id : "Web TV"},
-            message : "And got so far",
-            timeSent : "1001"
-        }
-    };
-
-
+    // Initialize connection with backend
     socket = new WebSocket('ws://ec2-54-152-59-214.compute-1.amazonaws.com:4445');
     socket.onopen = function () {
         console.log("connection opened.");
-        //socket.send(JSON.stringify(registration));
-        //socket.send(JSON.stringify(chime1));
-        //socket.send(JSON.stringify(chime2));
     }
 
 
-
-
+    // Update channel list
     var updateChannels = function() {
         $.get( GET_CHANNELS, function( data ) {
             var list = JSON.parse(data);
@@ -74,6 +47,7 @@ window.onload = function () {
         });
     }
 
+    // Update number of watching viewers
     var updateInfo = function() {
         $.get( GET_VIEWERS + curChannel, function( data ) {
             var num = JSON.parse(data);
@@ -83,8 +57,8 @@ window.onload = function () {
     }
 
     updateChannels();
-    //setInterval(updateChannels, 10000);
 
+    // Channel change event listener
     $('#channelList').change(function() {
         curChannel = $('select[id=channelList]').val();
         $('#ticker').empty();
@@ -116,6 +90,7 @@ window.onload = function () {
 
     })
 
+    // User submit change event
     $('#send').change(function() {
         var chime = {
             chimeMessage : {
