@@ -134,6 +134,7 @@ public class MasterRestManager implements Runnable {
             logger.info("POST: TV DELETION");
             try {
                 mapper.clearTelevision(new Channel(request.params(":channel")), new Television(request.params(":television")));
+                workerMap.removeTV(new Channel(request.params(":channel")), new Television(request.params(":television")));
                 return gson.toJson(new SuccessMessage("Television removed from channel"));
             } catch(Exception e) {
                 logger.error(e.toString());
@@ -165,11 +166,20 @@ public class MasterRestManager implements Runnable {
     private void sendChimes(ChimeMessage chimeMessage) {
         // Get currently watching televisions
         Set<Television> watchingTelevisions = channelMap.get(chimeMessage.getChannel());
+        int numWatchingTelevisions = 0;
+
+
+        // Check for no workers
+        if (workerMap.keySet().size() == 0) {
+            logger.error("No registered workers...");
+            return;
+        }
 
         for(Channel channel : workerMap.keySet()) {
             // Union worker TVs with watching TVs
             Set<Television> televisions = workerMap.get(channel);
             televisions.retainAll(watchingTelevisions);
+            numWatchingTelevisions += televisions.size();
 
             try {
                 logger.info(String.format("Worker %s is managing %d relevant televisions, delegating Chime...", channel.getId(), televisions.size()));
@@ -178,6 +188,10 @@ public class MasterRestManager implements Runnable {
             } catch (Exception e) {
                 logger.error(e.toString());
             }
+        }
+
+        if (numWatchingTelevisions == 0) {
+            logger.info(String.format("No watching televisions on channel %s", chimeMessage.getChannel().getId()));
         }
     }
 
