@@ -37,7 +37,7 @@ public class ChimeMasterManager {
 
         // Initialize RESTful API interface to handle HTTP requests
         MasterRestManager masterRestManager = new MasterRestManager(portNumber, channelMap, workerMap, mapper, httpMessageSender);
-        logger.info(String.format("Starting Chime Master port %d...", portNumber));
+        logger.info(String.format("Starting Chime Master on port %d...", portNumber));
         new Thread(masterRestManager).start();
 
         // Add shutdown hook to master
