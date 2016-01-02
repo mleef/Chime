@@ -12,6 +12,10 @@ Chime: Real Time Channel Based Messaging for Smart TVs
 ## Overview
 Chime is a high-performance chat server designed specifically to be used in conjunction with Smart TV applications. Chime can be deployed as either a monolithic instance or as a group of worker instances reporting to a master as pictured below.
 
+## Project Structure
+The Chime backend is written in Java and can be found in backend/src. The Chime frontend is written in Javascript/HTML/CSS and can be found in frontend. The doc folder contains
+a detailed Javadoc of the project. The packaged, runnable jar files can be found in backend/jars. 
+
 ## Backend Usage
 
 ### Default Ports
