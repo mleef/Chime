@@ -34,7 +34,16 @@ window.onload = function () {
         console.log("connection opened.");
     }
 
+    // Listen for new messages and add them to DOM
+    socket.onmessage = function (message) {
+        console.log("response received");
+        messageObj = JSON.parse(message.data);
+        console.log(messageObj);
+        //$("marquee").append(' ' + messageObj.message);
+        $("#ticker").append("<marquee id=\"ticker\" behavior=\"scroll\" direction=\"left\" height=\"20px\" loop=\"1\">"
+            + messageObj.message + "</marquee>");
 
+    }
     // Update channel list
     var updateChannels = function() {
         $.get( GET_CHANNELS, function( data ) {

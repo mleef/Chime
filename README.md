@@ -100,6 +100,17 @@ var chime = {
 socket.send(JSON.stringify(chime));
 ```
 
+To listen for Chimes sent from other clients:
+
+```javascript
+// Message event listener
+socket.onmessage = function (message) {
+    // Add new chimes onto message queue
+    messageObj = JSON.parse(message.data);
+    // Do other stuff with message
+}
+```
+
 ### Chime Worker/Master Communication
 
 To connect to a Chime Worker instance first send a HTTP POST request to the master to be assigned a worker:
@@ -113,6 +124,8 @@ The response should be a success object that contains a worker URL to connect to
     success : "[Worker URL]"
 }
 ```
+
+The worker URL can then be communicated with in the same manner as the monolithic setup. 
 
 ### System Design
 ![alt text](https://raw.githubusercontent.com/mleef/Chime/master/backend/resources/images/prototype.png "Monolith")
