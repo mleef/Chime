@@ -124,7 +124,7 @@ The response should be a success object that contains a worker URL to connect to
 }
 ```
 
-The worker URL can then be communicated with in the same manner as the monolithic setup. 
+The worker URL can then be communicated with in the same manner as the monolithic setup through a web socket connection. 
 
 ### System Design
 ![alt text](https://raw.githubusercontent.com/mleef/Chime/master/backend/resources/images/prototype.png "Monolith")
