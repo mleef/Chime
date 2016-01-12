@@ -105,7 +105,6 @@ To listen for Chimes sent from other clients:
 ```javascript
 // Message event listener
 socket.onmessage = function (message) {
-    // Add new chimes onto message queue
     messageObj = JSON.parse(message.data);
     // Do other stuff with message
 }
